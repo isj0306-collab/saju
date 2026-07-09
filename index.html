@@ -109,6 +109,14 @@ body{background:var(--bg)}
 .cal-legend{display:flex;gap:14px;margin-top:10px;font-size:12.5px;color:var(--sub);flex-wrap:wrap}
 .cal-legend .good{color:var(--wood);font-weight:700}
 .cal-legend .bad{color:var(--accent);font-weight:700}
+.gung-score{text-align:center;margin:18px 0 6px}
+.gung-score .num{font-size:52px;font-weight:800;color:var(--accent);line-height:1}
+.gung-score .num small{font-size:22px}
+.gung-score .band{font-size:15px;font-weight:700;margin-top:6px}
+.gung-bar{height:16px;background:var(--chip);border-radius:8px;overflow:hidden;margin:12px auto 2px;max-width:420px}
+.gung-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--accent));border-radius:8px}
+.gung-names{display:flex;justify-content:center;gap:14px;align-items:center;font-size:15px;font-weight:700;margin-top:14px}
+.gung-names .heart{color:var(--accent);font-size:20px}
 .love-block{margin-bottom:14px}
 .love-block h4{margin:0 0 6px;font-size:14px;color:var(--gold)}
 .love-block p{margin:0;font-size:14.5px}
@@ -172,6 +180,7 @@ body{background:var(--bg)}
       <button type="button" data-tab="today">오늘의 운세</button>
       <button type="button" data-tab="month">한 달 운세</button>
       <button type="button" data-tab="love">애정운</button>
+      <button type="button" data-tab="gung">친구·궁합</button>
     </div>
 
     <div class="tab-pane on" id="tab-paljja">
@@ -230,6 +239,41 @@ body{background:var(--bg)}
     <div class="card">
       <h2>애정운 심층 분석</h2>
       <div id="loveBody"></div>
+    </div>
+    </div>
+
+    <div class="tab-pane" id="tab-gung">
+    <div class="card">
+      <h2>친구·궁합 운세</h2>
+      <p class="cal-head" style="margin-top:0">내 사주와 상대방(친구·연인·가족)의 사주를 비교해 두 사람의 궁합을 봅니다.<br>상대방의 생년월일만 알면 됩니다.</p>
+      <div class="frm">
+        <div class="fld"><label>상대방 이름 (선택)</label><input type="text" id="pName" placeholder="친구 이름" style="width:130px"></div>
+        <div class="fld"><label>양력 / 음력</label>
+          <div class="rowline">
+            <div class="seg" id="segPCal"><button type="button" data-v="S" class="on">양력</button><button type="button" data-v="L">음력</button></div>
+            <label class="chk" id="pLeapWrap" style="display:none"><input type="checkbox" id="pLeap">윤달</label>
+          </div>
+        </div>
+        <div class="fld"><label>상대방 생년월일</label>
+          <div class="rowline">
+            <select id="pY"></select><span>년</span>
+            <select id="pM"></select><span>월</span>
+            <select id="pD"></select><span>일</span>
+          </div>
+        </div>
+      </div>
+      <button class="go" id="btnGung" style="letter-spacing:2px">궁합 보기</button>
+      <div class="err" id="gungErr"></div>
+      <div id="gungResult" style="display:none">
+        <div class="gung-names" id="gungNames"></div>
+        <div class="gung-score">
+          <div class="num"><span id="gungNum"></span><small> 점</small></div>
+          <div class="band" id="gungBand"></div>
+        </div>
+        <div class="gung-bar"><i id="gungBarFill" style="width:0%"></i></div>
+        <div class="total-msg" id="gungTotal" style="margin-top:16px"></div>
+        <div id="gungBody"></div>
+      </div>
     </div>
     </div>
   </div>
@@ -685,6 +729,8 @@ function pillarHTML(title, p, isDay){
 }
 
 function render(r, name){
+  lastR = r; lastName = name || '';
+  $('gungResult').style.display = 'none';
   /* 명식 */
   var chips = [];
   chips.push('양력 <b>'+r.solar.y+'.'+pad(r.solar.m)+'.'+pad(r.solar.d)+'</b>');
@@ -882,6 +928,103 @@ function renderLove(r, now){
   $('loveBody').innerHTML = blocks.map(function(b){
     return '<div class="love-block"><h4>'+b[0]+'</h4><p>'+b[1]+'</p></div>';
   }).join('');
+}
+
+/* ---------- 친구·궁합 ---------- */
+var lastR = null, lastName = '';
+var pCal = 'S';
+segInit('segPCal', function(v){ pCal=v; $('pLeapWrap').style.display = v==='L'?'flex':'none'; });
+(function fillPartnerSelects(){
+  var now=new Date(), ys=$('pY'), ms=$('pM'), ds=$('pD'), i, o;
+  for(i=now.getFullYear(); i>=1901; i--){o=document.createElement('option');o.value=i;o.textContent=i;ys.appendChild(o);}
+  ys.value=1990;
+  for(i=1;i<=12;i++){o=document.createElement('option');o.value=i;o.textContent=i;ms.appendChild(o);}
+  for(i=1;i<=31;i++){o=document.createElement('option');o.value=i;o.textContent=i;ds.appendChild(o);}
+})();
+
+function ilganName(s){ return SAJU.STEMS[s] + ELE_KO[SAJU.STEM_ELE[s]]; }
+
+$('btnGung').addEventListener('click', function(){
+  var err=$('gungErr'); err.style.display='none';
+  if(!lastR){ err.textContent='먼저 위에서 내 사주를 계산해 주세요.'; err.style.display='block'; return; }
+  var input={ y:+$('pY').value, m:+$('pM').value, d:+$('pD').value, h:12, min:0,
+    isLunar:pCal==='L', isLeap:pCal==='L'&&$('pLeap').checked, unknownTime:true };
+  if(!input.isLunar){
+    var chk=new Date(input.y, input.m-1, input.d);
+    if(chk.getMonth()!==input.m-1||chk.getDate()!==input.d){ err.textContent='존재하지 않는 날짜입니다.'; err.style.display='block'; return; }
+  }
+  var p = SAJU.compute(input);
+  if(p.error){ err.textContent=p.error; err.style.display='block'; return; }
+  renderGung(lastR, p, lastName||'나', $('pName').value.trim()||'상대방');
+});
+
+function renderGung(me, p, myName, pName){
+  var score = 50, blocks = [];
+  var myS = me.day.stem, pS = p.day.stem;
+  var myJa = myName==='나' ? '내가' : myName+'님이';       // 주어 (이/가)
+  var myUl = myName==='나' ? '나를' : myName+'님을';       // 목적어 (을/를)
+  var pJa = pName==='상대방' ? '상대방이' : pName+'님이';
+  var pUl = pName==='상대방' ? '상대방을' : pName+'님을';
+  var pUi = pName==='상대방' ? '상대방의' : pName+'님의';
+
+  /* 1) 일간 관계 */
+  var ilganTxt, hap = ((myS - pS + 10) % 10) === 5;
+  if(hap){ score += 20; ilganTxt = '두 사람의 일간이 천간합(天干合)을 이루는 보기 드문 조합입니다. 서로에게 자석처럼 끌리고, 함께 있을 때 시너지가 커지는 찰떡궁합입니다.'; }
+  else {
+    var rel = (SAJU.STEM_ELE[pS] - SAJU.STEM_ELE[myS] + 5) % 5;
+    if(rel===0){ score += 8;  ilganTxt = '두 사람의 기운이 같은 비화(比和) 관계입니다. 닮은 점이 많아 금방 통하지만, 비슷한 만큼 서로 양보가 필요할 때도 있습니다.'; }
+    if(rel===1){ score += 12; ilganTxt = myJa+' '+pUl+' 생(生)해 주는 관계입니다. 내가 상대를 챙기고 이끌어 주는 인연으로, 베푸는 만큼 정이 깊어집니다.'; }
+    if(rel===2){ score += 2;  ilganTxt = myJa+' 관계의 주도권을 쥐는 조합입니다. 상대를 존중하는 마음을 잃지 않아야 오래가는 인연이 됩니다.'; }
+    if(rel===3){ score -= 4;  ilganTxt = pUi+' 기운이 '+myUl+' 단련시키는 관계입니다. 함께 있으면 긴장감이 있지만, 그만큼 나를 성장시키는 인연이기도 합니다.'; }
+    if(rel===4){ score += 15; ilganTxt = pJa+' '+myUl+' 생(生)해 주는 관계입니다. 함께 있으면 힘을 얻고 배울 것이 많은, 귀인 같은 인연입니다.'; }
+  }
+  blocks.push(['일간 궁합 — '+ilganName(myS)+'(나) & '+ilganName(pS)+'(상대)', ilganTxt]);
+
+  /* 2) 일지 관계 */
+  var dRel = branchRel(me.day.branch, p.day.branch), dTxt;
+  if(YUKHAP[me.day.branch]===p.day.branch){ score += 15; dTxt = '두 사람의 일지가 육합(六合)을 이룹니다. 속마음이 잘 통하고 함께 있으면 편안한, 정서적 궁합이 뛰어난 사이입니다.'; }
+  else if(dRel>0){ score += 12; dTxt = '두 사람의 일지가 삼합(三合)의 기운으로 통합니다. 함께 일을 도모하면 좋은 결과를 내는, 팀워크가 좋은 사이입니다.'; }
+  else if(dRel<0){ score -= 12; dTxt = '두 사람의 일지가 충(沖)이 됩니다. 부딪히는 날도 있지만, 서로 다르기에 배울 것도 많은 사이입니다. 다툰 뒤에는 빨리 화해하는 것이 비결입니다.'; }
+  else { score += 3; dTxt = '두 사람의 일지는 무난한 관계입니다. 큰 마찰 없이 서로의 자리를 지켜 주는 편안한 사이입니다.'; }
+  blocks.push(['속마음 궁합 (일지)', dTxt]);
+
+  /* 3) 띠 궁합 (년지) */
+  var yRel = branchRel(me.year.branch, p.year.branch), yTxt;
+  var myAni = SAJU.ANIMALS[me.year.branch], pAni = SAJU.ANIMALS[p.year.branch];
+  if(yRel>0){ score += 8; yTxt = myAni+'띠와 '+pAni+'띠는 합(合)이 되는 띠입니다. 어른들이 말하는 "궁합 좋은 띠"로, 주변의 응원을 받는 조합입니다.'; }
+  else if(yRel<0){ score -= 8; yTxt = myAni+'띠와 '+pAni+'띠는 충(沖)이 되는 띠입니다. 성향 차이가 있지만, 차이를 인정하면 오히려 서로를 보완하는 짝이 됩니다.'; }
+  else { score += 2; yTxt = myAni+'띠와 '+pAni+'띠는 무난하게 어울리는 조합입니다.'; }
+  blocks.push(['띠 궁합 — '+myAni+'띠 & '+pAni+'띠', yTxt]);
+
+  /* 4) 오행 보완 */
+  var iFill=[], pFill=[], e;
+  for(e=0;e<5;e++){
+    if(me.eleCount[e]===0 && p.eleCount[e]>0) iFill.push(SAJU.ELE_NAMES[e]);
+    if(p.eleCount[e]===0 && me.eleCount[e]>0) pFill.push(SAJU.ELE_NAMES[e]);
+  }
+  score += Math.min(10, iFill.length*5) + Math.min(5, pFill.length*3);
+  var eTxt;
+  if(iFill.length&&pFill.length) eTxt = '상대는 나에게 없는 '+iFill.join(', ')+'의 기운을, 나는 상대에게 없는 '+pFill.join(', ')+'의 기운을 채워 줍니다. 서로의 빈자리를 메워 주는 상호 보완형 궁합입니다.';
+  else if(iFill.length) eTxt = '상대가 내 사주에 없는 '+iFill.join(', ')+'의 기운을 채워 줍니다. 함께 있을수록 내 운의 균형이 좋아지는 고마운 인연입니다.';
+  else if(pFill.length) eTxt = '내가 상대의 사주에 없는 '+pFill.join(', ')+'의 기운을 채워 줍니다. 상대에게 내가 꼭 필요한 존재라는 뜻입니다.';
+  else eTxt = '두 사람의 오행 구성이 비슷합니다. 서로를 잘 이해하는 만큼, 같은 약점을 조심하면 됩니다.';
+  blocks.push(['오행 보완', eTxt]);
+
+  score = Math.max(38, Math.min(100, score));
+  var band = score>=90?'하늘이 맺어 준 인연 💫':score>=75?'아주 좋은 궁합 🌸':score>=60?'무난하고 편안한 궁합 🍀':score>=48?'노력하면 좋아지는 궁합 🌱':'서로를 알아 가는 궁합 🌾';
+  var total = score>=75?'함께할수록 서로에게 복이 되는 조합입니다. 좋은 일은 함께 도모하고, 기쁜 날은 함께 보내세요.'
+    :score>=60?'큰 굴곡 없이 오래 가는 인연입니다. 꾸준한 연락과 작은 배려가 이 관계의 보약입니다.'
+    :'처음엔 서로 달라 보여도, 그 다름이 곧 배울 점입니다. 상대의 방식을 인정하는 순간 관계가 한 단계 깊어집니다.';
+
+  $('gungNames').innerHTML = '<span>'+myName+' ('+me.day.name+'일주)</span><span class="heart">♥</span><span>'+pName+' ('+p.day.name+'일주)</span>';
+  $('gungNum').textContent = score;
+  $('gungBand').textContent = band;
+  $('gungBarFill').style.width = score+'%';
+  $('gungTotal').innerHTML = '<b>총평</b><br>'+total;
+  $('gungBody').innerHTML = blocks.map(function(b){
+    return '<div class="love-block"><h4>'+b[0]+'</h4><p>'+b[1]+'</p></div>';
+  }).join('');
+  $('gungResult').style.display='block';
 }
 
 /* ---------- 실행 ---------- */
