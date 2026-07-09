@@ -380,9 +380,12 @@ details.help .help-in b{color:var(--ink)}
     <div class="tab-pane" id="tab-gung">
     <div class="card">
       <h2>친구·궁합 운세</h2>
-      <p class="cal-head" style="margin-top:0">내 사주와 상대방(친구·연인·가족)의 사주를 비교해 두 사람의 궁합을 봅니다.<br>상대방의 생년월일만 알면 됩니다.</p>
+      <p class="cal-head" style="margin-top:0">내 사주와 상대방(친구·연인·가족)의 사주를 비교해 두 사람의 궁합을 봅니다.<br>태어난 시간까지 알면 궁합이 더 정확해져요. (몰라도 볼 수 있어요)</p>
       <div class="frm">
         <div class="fld"><label>상대방 이름 (선택)</label><input type="text" id="pName" placeholder="친구 이름" style="width:130px"></div>
+        <div class="fld"><label>성별</label>
+          <div class="seg" id="segPGender"><button type="button" data-v="M">남자</button><button type="button" data-v="F" class="on">여자</button></div>
+        </div>
         <div class="fld"><label>양력 / 음력</label>
           <div class="rowline">
             <div class="seg" id="segPCal"><button type="button" data-v="S" class="on">양력</button><button type="button" data-v="L">음력</button></div>
@@ -394,6 +397,12 @@ details.help .help-in b{color:var(--ink)}
             <select id="pY"></select><span>년</span>
             <select id="pM"></select><span>월</span>
             <select id="pD"></select><span>일</span>
+          </div>
+        </div>
+        <div class="fld"><label>태어난 시간</label>
+          <div class="rowline">
+            <input type="time" id="pT" value="12:00">
+            <label class="chk"><input type="checkbox" id="pNoTime" checked>시간 모름</label>
           </div>
         </div>
       </div>
@@ -969,7 +978,7 @@ function pillarHTML(title, p, isDay){
 }
 
 function render(r, name){
-  lastR = r; lastName = name || '';
+  lastR = r; lastName = name || ''; lastGender = gender;
   $('gungResult').style.display = 'none';
   /* 명식 */
   var chips = [];
@@ -1402,9 +1411,12 @@ function renderLove(r, now){
 }
 
 /* ---------- 친구·궁합 ---------- */
-var lastR = null, lastName = '';
-var pCal = 'S';
+var lastR = null, lastName = '', lastGender = 'M';
+var pCal = 'S', pGender = 'F';
 segInit('segPCal', function(v){ pCal=v; $('pLeapWrap').style.display = v==='L'?'flex':'none'; });
+segInit('segPGender', function(v){ pGender=v; });
+$('pNoTime').addEventListener('change', function(){ $('pT').disabled=this.checked; });
+$('pT').disabled = true;
 (function fillPartnerSelects(){
   var now=new Date(), ys=$('pY'), ms=$('pM'), ds=$('pD'), i, o;
   for(i=now.getFullYear(); i>=1901; i--){o=document.createElement('option');o.value=i;o.textContent=i;ys.appendChild(o);}
@@ -1418,18 +1430,20 @@ function ilganName(s){ return SAJU.STEMS[s] + ELE_KO[SAJU.STEM_ELE[s]]; }
 $('btnGung').addEventListener('click', function(){
   var err=$('gungErr'); err.style.display='none';
   if(!lastR){ err.textContent='먼저 위에서 내 사주를 계산해 주세요.'; err.style.display='block'; return; }
-  var input={ y:+$('pY').value, m:+$('pM').value, d:+$('pD').value, h:12, min:0,
-    isLunar:pCal==='L', isLeap:pCal==='L'&&$('pLeap').checked, unknownTime:true };
+  var noTime=$('pNoTime').checked, t=($('pT').value||'12:00').split(':');
+  var input={ y:+$('pY').value, m:+$('pM').value, d:+$('pD').value,
+    h:noTime?12:(+t[0]||0), min:noTime?0:(+t[1]||0),
+    isLunar:pCal==='L', isLeap:pCal==='L'&&$('pLeap').checked, gender:pGender, unknownTime:noTime };
   if(!input.isLunar){
     var chk=new Date(input.y, input.m-1, input.d);
     if(chk.getMonth()!==input.m-1||chk.getDate()!==input.d){ err.textContent='존재하지 않는 날짜입니다.'; err.style.display='block'; return; }
   }
   var p = SAJU.compute(input);
   if(p.error){ err.textContent=p.error; err.style.display='block'; return; }
-  renderGung(lastR, p, lastName||'나', $('pName').value.trim()||'상대방');
+  renderGung(lastR, p, lastName||'나', $('pName').value.trim()||'상대방', pGender);
 });
 
-function renderGung(me, p, myName, pName){
+function renderGung(me, p, myName, pName, pGen){
   var score = 50, blocks = [];
   var myS = me.day.stem, pS = p.day.stem;
   var myJa = myName==='나' ? '내가' : myName+'님이';       // 주어 (이/가)
@@ -1487,7 +1501,9 @@ function renderGung(me, p, myName, pName){
     :score>=60?'큰 굴곡 없이 오래 가는 인연입니다. 꾸준한 연락과 작은 배려가 이 관계의 보약입니다.'
     :'처음엔 서로 달라 보여도, 그 다름이 곧 배울 점입니다. 상대의 방식을 인정하는 순간 관계가 한 단계 깊어집니다.';
 
-  $('gungNames').innerHTML = '<span>'+myName+' ('+me.day.name+'일주)</span><span class="heart">♥</span><span>'+pName+' ('+p.day.name+'일주)</span>';
+  var myG = lastGender==='M' ? '♂' : '♀', pG = pGen==='M' ? '♂' : '♀';
+  $('gungNames').innerHTML = '<span>'+myName+' '+myG+' <small style="color:var(--sub);font-weight:400">'+me.day.name+'일주</small></span>'
+    + '<span class="heart">♥</span><span>'+pName+' '+pG+' <small style="color:var(--sub);font-weight:400">'+p.day.name+'일주</small></span>';
   $('gungNum').textContent = score;
   $('gungBand').textContent = band;
   $('gungBarFill').style.width = score+'%';
