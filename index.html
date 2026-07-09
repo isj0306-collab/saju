@@ -137,6 +137,18 @@ details.help .help-in b{color:var(--ink)}
 .chong-sec .ch-st{margin-left:auto;color:var(--star);font-size:14px;letter-spacing:1px}
 .chong-sec p{margin:0;font-size:14.5px;line-height:1.75}
 .chong-sec p + p{margin-top:8px}
+/* 한자 풀이 사전 */
+.glo-h{font-size:14px;color:var(--gold);margin:18px 0 10px;font-weight:800}
+.gan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.ji-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.glo-cell{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.glo-cell .hja{width:40px;height:40px;flex-shrink:0;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:24px;font-weight:800;color:#fff;font-family:"Batang","Nanum Myeongjo",serif}
+.glo-cell .hja.metal{color:#26251f}
+.glo-cell .info{flex:1;min-width:0}
+.glo-cell .rd{font-size:14px;font-weight:700}
+.glo-cell .rd .emo{font-size:15px}
+.glo-cell .de{font-size:11.5px;color:var(--sub);margin-top:1px;line-height:1.4}
 
 .dw-meta{font-size:13.5px;color:var(--sub);margin-bottom:10px}
 .dw-list{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}
@@ -290,6 +302,23 @@ details.help .help-in b{color:var(--ink)}
         <div class="help-in">
           <p><b>대운(大運)</b>은 인생의 큰 흐름을 <b>10년 단위</b>로 나눈 거예요. 계절이 바뀌듯, 10년마다 나에게 들어오는 기운이 달라진다고 봐요.</p>
           <p>각 칸의 나이는 그 흐름이 시작되는 시점이에요. 좌우로 밀어서 더 먼 나이까지 볼 수 있어요. 지금 내 나이가 속한 칸이 <b>요즘 나의 큰 운</b>이라고 생각하면 돼요.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>한자 풀이 — 천간과 지지</h2>
+      <p class="cal-head" style="margin-top:0">사주의 여덟 글자는 하늘 기운 <b>천간(天干) 10개</b>와 땅 기운 <b>지지(地支) 12개</b>를 하나씩 짝지은 거예요. 예를 들어 <b>병인(丙寅)</b>은 하늘의 '병(丙)'과 땅의 '인(寅)'이 만난 거예요. 아래에서 각 글자의 뜻을 찾아보세요.</p>
+      <h4 class="glo-h">천간 (天干) · 하늘의 기운 10가지</h4>
+      <div class="gan-grid" id="ganGrid"></div>
+      <h4 class="glo-h">지지 (地支) · 땅의 기운 12가지 (=띠)</h4>
+      <div class="ji-grid" id="jiGrid"></div>
+      <details class="help">
+        <summary>❓ 왜 60가지가 되나요? (쉽게 보기)</summary>
+        <div class="help-in">
+          <p>하늘 글자 10개와 땅 글자 12개를 순서대로 짝지으면 — 갑자, 을축, 병인, 정묘… — 다시 처음으로 돌아올 때까지 <b>60가지</b> 조합이 나와요. 이걸 <b>육십갑자(六十甲子)</b>라고 해요.</p>
+          <p>옛날에는 이 60개로 <b>년·월·일·시</b>를 셌어요. "올해는 병오년, 오늘은 갑자일" 하는 식으로요. 그래서 태어난 순간의 년·월·일·시를 각각 이 글자로 바꾼 게 바로 <b>사주(네 기둥)</b>랍니다.</p>
+          <p>환갑(만 60세)을 크게 기념하는 것도, 태어난 해의 육십갑자가 <b>한 바퀴 돌아 다시 돌아왔기</b> 때문이에요!</p>
         </div>
       </details>
     </div>
@@ -737,6 +766,10 @@ var SPOUSE = {
   '정인':'자상하고 따뜻하게 나를 챙겨 주는 배우자를 만납니다. 어머니(아버지) 같은 포근한 짝입니다.'
 };
 var ELE_HEALTH = ['간·눈·근육과 신경','심장·혈압과 혈액순환','위장·소화기','폐·기관지·피부','신장·방광과 비뇨기'];
+/* 천간 상징 (갑~계) */
+var STEM_SYMBOL = ['큰 나무','화초·덩굴','태양','촛불·등불','큰 산','논밭·정원','무쇠·바위','보석·보검','강·바다','빗물·이슬'];
+/* 지지 시간 (자~해) */
+var BRANCH_TIME = ['23:30~01:30','01:30~03:30','03:30~05:30','05:30~07:30','07:30~09:30','09:30~11:30','11:30~13:30','13:30~15:30','15:30~17:30','17:30~19:30','19:30~21:30','21:30~23:30'];
 /* 띠 (지지 0~11 순서: 자축인묘진사오미신유술해) */
 var ANIMAL_EMOJI = ['🐭','🐮','🐯','🐰','🐲','🐍','🐴','🐑','🐵','🐔','🐶','🐷'];
 var ANIMAL_TRAIT = [
@@ -1492,6 +1525,27 @@ function run(){
   $('result').scrollIntoView({behavior:'smooth'});
 }
 $('btnGo').addEventListener('click', run);
+
+/* 한자 풀이 사전 (사람과 무관, 처음 한 번만 생성) */
+(function buildGlossary(){
+  var yyH = function(i){ return i%2===0 ? '양(陽)' : '음(陰)'; };
+  var gan = '';
+  for(var s=0;s<10;s++){
+    var ele = SAJU.STEM_ELE[s];
+    gan += '<div class="glo-cell"><div class="hja e-'+ELE_CLS[ele]+(ele===3?' metal':'')+'">'+SAJU.STEMS_H[s]+'</div>'
+      + '<div class="info"><div class="rd">'+SAJU.STEMS[s]+'('+SAJU.STEMS_H[s]+')</div>'
+      + '<div class="de">'+yyH(s)+' · '+SAJU.ELE_NAMES[ele]+' · '+STEM_SYMBOL[s]+'</div></div></div>';
+  }
+  $('ganGrid').innerHTML = gan;
+  var ji = '';
+  for(var b=0;b<12;b++){
+    var e2 = SAJU.BRANCH_ELE[b];
+    ji += '<div class="glo-cell"><div class="hja e-'+ELE_CLS[e2]+(e2===3?' metal':'')+'">'+SAJU.BRANCHES_H[b]+'</div>'
+      + '<div class="info"><div class="rd">'+SAJU.BRANCHES[b]+'('+SAJU.BRANCHES_H[b]+') <span class="emo">'+ANIMAL_EMOJI[b]+'</span>'+SAJU.ANIMALS[b]+'띠</div>'
+      + '<div class="de">'+yyH(b)+' · '+SAJU.ELE_NAMES[e2]+' · '+BRANCH_TIME[b]+'</div></div></div>';
+  }
+  $('jiGrid').innerHTML = ji;
+})();
 
 /* 마지막 입력 복원 */
 try{
