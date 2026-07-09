@@ -188,7 +188,8 @@ details.help .help-in b{color:var(--ink)}
 .gung-names .heart{color:var(--accent);font-size:20px}
 .love-block{margin-bottom:14px}
 .love-block h4{margin:0 0 6px;font-size:14px;color:var(--gold)}
-.love-block p{margin:0;font-size:14.5px}
+.love-block p{margin:0;font-size:14.5px;line-height:1.7}
+.love-block p + p{margin-top:8px}
 .today-date{font-size:13px;color:var(--sub);margin-bottom:12px}
 .fortune-row{display:flex;align-items:baseline;gap:10px;margin:11px 0;flex-wrap:wrap}
 .fortune-row .cat{width:86px;font-weight:800;font-size:14.5px;flex-shrink:0}
@@ -1443,63 +1444,106 @@ $('btnGung').addEventListener('click', function(){
   renderGung(lastR, p, lastName||'나', $('pName').value.trim()||'상대방', pGender);
 });
 
+/* 상대가 나에게 어떤 존재인가 (내 일간 기준 상대 일간의 십신 그룹) */
+var ROLE_TO_ME = [
+  '상대는 나와 <b>대등한 동료</b> 같은 존재입니다. 눈높이가 비슷해 금방 친해지고 편안하지만, 둘 다 주관이 뚜렷해 은근한 기 싸움이 생길 수 있어요. 서로 응원군이 되어 주면 최고의 파트너가 됩니다.',
+  '나는 상대를 <b>돌봐 주고 즐겁게 해 주고 싶어지는</b> 관계입니다. 상대에게 자연스럽게 마음과 에너지를 쏟게 되는, 내가 베푸는 입장이에요. 상대는 그런 나에게 웃음과 활기를 돌려줍니다.',
+  '나는 상대를 <b>이끌고 챙기는</b> 입장입니다. 내가 주도권을 쥐고 현실적인 부분을 리드하게 되는 관계로, 상대는 나에게 활력과 재미를 주는 존재예요. 다만 너무 내 방식대로 끌지 않도록 살펴 주세요.',
+  '상대는 <b>나를 이끌고 긴장시키는</b> 존재입니다. 때로 어렵거나 조심스럽게 느껴지지만, 그만큼 나를 다잡아 주고 성장시키는 사람이에요. 믿고 따르면 크게 배우는 관계입니다.',
+  '상대는 <b>나를 아끼고 보살펴 주는</b> 존재입니다. 나도 모르게 기대고 의지하게 되는, 든든한 울타리 같은 사람이에요. 받은 만큼 고마움을 표현하면 관계가 더 깊어집니다.'
+];
 function renderGung(me, p, myName, pName, pGen){
   var score = 50, blocks = [];
   var myS = me.day.stem, pS = p.day.stem;
-  var myJa = myName==='나' ? '내가' : myName+'님이';       // 주어 (이/가)
-  var myUl = myName==='나' ? '나를' : myName+'님을';       // 목적어 (을/를)
+  var myJa = myName==='나' ? '내가' : myName+'님이';
+  var myUl = myName==='나' ? '나를' : myName+'님을';
   var pJa = pName==='상대방' ? '상대방이' : pName+'님이';
   var pUl = pName==='상대방' ? '상대방을' : pName+'님을';
   var pUi = pName==='상대방' ? '상대방의' : pName+'님의';
+  var weakest = {sc: 99, tip: ''};   // 가장 아쉬운 항목 추적 → 잘 지내는 비결
+  function note(sc, tip){ if(sc < weakest.sc){ weakest.sc = sc; weakest.tip = tip; } }
 
-  /* 1) 일간 관계 */
-  var ilganTxt, hap = ((myS - pS + 10) % 10) === 5;
-  if(hap){ score += 20; ilganTxt = '두 사람의 일간이 천간합(天干合)을 이루는 보기 드문 조합입니다. 서로에게 자석처럼 끌리고, 함께 있을 때 시너지가 커지는 찰떡궁합입니다.'; }
+  /* 1) 첫인상·케미 (일간 관계) */
+  var ilganTxt, hap = ((myS - pS + 10) % 10) === 5, add;
+  if(hap){ add=20; ilganTxt = '<p>두 사람의 일간이 <b>천간합(天干合)</b>을 이루는 보기 드문 조합입니다. 서로에게 자석처럼 끌리고, 처음 만나도 오래 알던 사이처럼 편안함을 느낍니다.</p><p>함께 있을 때 시너지가 커지는 찰떡궁합이라, 한 팀이 되면 서로의 부족한 점을 자연스럽게 메워 줍니다.</p>'; }
   else {
     var rel = (SAJU.STEM_ELE[pS] - SAJU.STEM_ELE[myS] + 5) % 5;
-    if(rel===0){ score += 8;  ilganTxt = '두 사람의 기운이 같은 비화(比和) 관계입니다. 닮은 점이 많아 금방 통하지만, 비슷한 만큼 서로 양보가 필요할 때도 있습니다.'; }
-    if(rel===1){ score += 12; ilganTxt = myJa+' '+pUl+' 생(生)해 주는 관계입니다. 내가 상대를 챙기고 이끌어 주는 인연으로, 베푸는 만큼 정이 깊어집니다.'; }
-    if(rel===2){ score += 2;  ilganTxt = myJa+' 관계의 주도권을 쥐는 조합입니다. 상대를 존중하는 마음을 잃지 않아야 오래가는 인연이 됩니다.'; }
-    if(rel===3){ score -= 4;  ilganTxt = pUi+' 기운이 '+myUl+' 단련시키는 관계입니다. 함께 있으면 긴장감이 있지만, 그만큼 나를 성장시키는 인연이기도 합니다.'; }
-    if(rel===4){ score += 15; ilganTxt = pJa+' '+myUl+' 생(生)해 주는 관계입니다. 함께 있으면 힘을 얻고 배울 것이 많은, 귀인 같은 인연입니다.'; }
+    if(rel===0){ add=8;  ilganTxt = '<p>두 사람의 기운이 같은 <b>비화(比和)</b> 관계입니다. 성향이 닮아 말이 잘 통하고 취향도 비슷해 금세 가까워집니다.</p><p>다만 둘 다 비슷한 고집이 있어, 부딪힐 땐 누구 하나가 먼저 물러서 주는 여유가 필요합니다.</p>'; }
+    if(rel===1){ add=12; ilganTxt = '<p>'+myJa+' '+pUl+' <b>생(生)해 주는</b> 관계입니다. 내가 상대를 챙기고 이끌어 주게 되는 인연으로, 베풀수록 정이 깊어집니다.</p><p>상대는 그런 나를 편안하게 여기고 잘 따라 줍니다. 다만 나만 주는 관계가 되지 않게 상대의 표현도 기대해 보세요.</p>'; }
+    if(rel===2){ add=2;  ilganTxt = '<p>'+myJa+' 관계의 <b>주도권</b>을 쥐는 조합입니다. 내가 방향을 정하고 이끄는 편이라 시원시원하게 흘러갑니다.</p><p>다만 상대도 존중받고 싶어 하니, 결정 전에 한 번 물어봐 주는 것만으로 관계가 훨씬 부드러워집니다.</p>'; }
+    if(rel===3){ add=-4; ilganTxt = '<p>'+pUi+' 기운이 '+myUl+' <b>단련시키는</b> 관계입니다. 함께 있으면 적당한 긴장감이 있고, 상대가 나를 자극해 성장하게 만듭니다.</p><p>처음엔 어렵게 느껴져도, 이 긴장이 오히려 서로를 발전시키는 원동력이 됩니다.</p>'; }
+    if(rel===4){ add=15; ilganTxt = '<p>'+pJa+' '+myUl+' <b>생(生)해 주는</b> 관계입니다. 함께 있으면 힘이 나고 배울 것이 많은, <b>귀인</b> 같은 인연입니다.</p><p>상대에게 자꾸 기대게 되니, 고마움을 자주 표현하면 관계가 오래 빛납니다.</p>'; }
   }
-  blocks.push(['일간 궁합 — '+ilganName(myS)+'(나) & '+ilganName(pS)+'(상대)', ilganTxt]);
+  score += add;
+  blocks.push(['첫인상·케미 — '+ilganName(myS)+'(나) & '+ilganName(pS)+'(상대)', ilganTxt]);
 
-  /* 2) 일지 관계 */
+  /* 2) 상대는 나에게 어떤 존재? (역할 궁합) */
+  var roleG = SSN_GROUP[SAJU.tenGod(myS, pS)];
+  blocks.push(['상대는 나에게 어떤 사람일까', '<p>'+ROLE_TO_ME[roleG]+'</p>']);
+
+  /* 3) 속마음·정서 궁합 (일지) */
   var dRel = branchRel(me.day.branch, p.day.branch), dTxt;
-  if(YUKHAP[me.day.branch]===p.day.branch){ score += 15; dTxt = '두 사람의 일지가 육합(六合)을 이룹니다. 속마음이 잘 통하고 함께 있으면 편안한, 정서적 궁합이 뛰어난 사이입니다.'; }
-  else if(dRel>0){ score += 12; dTxt = '두 사람의 일지가 삼합(三合)의 기운으로 통합니다. 함께 일을 도모하면 좋은 결과를 내는, 팀워크가 좋은 사이입니다.'; }
-  else if(dRel<0){ score -= 12; dTxt = '두 사람의 일지가 충(沖)이 됩니다. 부딪히는 날도 있지만, 서로 다르기에 배울 것도 많은 사이입니다. 다툰 뒤에는 빨리 화해하는 것이 비결입니다.'; }
-  else { score += 3; dTxt = '두 사람의 일지는 무난한 관계입니다. 큰 마찰 없이 서로의 자리를 지켜 주는 편안한 사이입니다.'; }
-  blocks.push(['속마음 궁합 (일지)', dTxt]);
+  if(YUKHAP[me.day.branch]===p.day.branch){ score += 15; dTxt = '<p>두 사람의 일지가 <b>육합(六合)</b>을 이룹니다. 굳이 말하지 않아도 속마음이 통하고, 함께 있으면 마음이 놓이는 정서적 궁합 최고의 사이입니다.</p><p>힘든 일이 있을 때 서로에게 가장 먼저 기대고 싶은 상대가 됩니다.</p>'; }
+  else if(dRel>0){ score += 12; dTxt = '<p>두 사람의 일지가 <b>삼합(三合)</b>의 기운으로 통합니다. 뜻이 잘 맞아 함께 무언가를 도모하면 좋은 결과를 내는, 팀워크가 뛰어난 사이입니다.</p><p>연애든 동업이든 "같이 하면 잘되는" 조합이에요.</p>'; }
+  else if(dRel<0){ score -= 12; dTxt = '<p>두 사람의 일지가 <b>충(沖)</b>이 됩니다. 살아온 방식이 달라 가끔 부딪히지만, 그만큼 서로에게 없는 것을 배우는 사이이기도 합니다.</p><p>다툼은 짧게, 화해는 빠르게 — 감정이 상했을 땐 그 자리에서 바로 풀어야 오래갑니다.</p>'; note(-12,'두 분은 속마음(일지)이 충(沖)이라 사소한 일로 감정이 상하기 쉬워요. 서운함을 담아 두지 말고 <b>그날 바로 풀고 넘어가는 것</b>이 이 인연을 지키는 가장 큰 비결이에요.'); }
+  else { score += 3; dTxt = '<p>두 사람의 일지는 <b>무난한</b> 관계입니다. 큰 마찰 없이 서로의 자리를 지켜 주는 편안한 사이예요.</p><p>불꽃 튀는 스타일은 아니지만, 오래 곁에 두기 좋은 담백한 인연입니다.</p>'; }
+  blocks.push(['속마음·정서 궁합', dTxt]);
 
-  /* 3) 띠 궁합 (년지) */
+  /* 4) 띠 궁합 (년지) */
   var yRel = branchRel(me.year.branch, p.year.branch), yTxt;
   var myAni = SAJU.ANIMALS[me.year.branch], pAni = SAJU.ANIMALS[p.year.branch];
-  if(yRel>0){ score += 8; yTxt = myAni+'띠와 '+pAni+'띠는 합(合)이 되는 띠입니다. 어른들이 말하는 "궁합 좋은 띠"로, 주변의 응원을 받는 조합입니다.'; }
-  else if(yRel<0){ score -= 8; yTxt = myAni+'띠와 '+pAni+'띠는 충(沖)이 되는 띠입니다. 성향 차이가 있지만, 차이를 인정하면 오히려 서로를 보완하는 짝이 됩니다.'; }
-  else { score += 2; yTxt = myAni+'띠와 '+pAni+'띠는 무난하게 어울리는 조합입니다.'; }
+  if(yRel>0){ score += 8; yTxt = '<p>'+myAni+'띠와 '+pAni+'띠는 <b>합(合)이 되는 띠</b>입니다. 어른들이 말하는 "궁합 좋은 띠"로, 양가 어른들도 반기고 주변의 응원을 받는 조합이에요.</p>'; }
+  else if(yRel<0){ score -= 8; yTxt = '<p>'+myAni+'띠와 '+pAni+'띠는 <b>충(沖)이 되는 띠</b>입니다. 생활 리듬이나 가치관에 차이가 있을 수 있지만, 그 차이를 "틀림"이 아니라 "다름"으로 받아들이면 오히려 서로를 채워 주는 짝이 됩니다.</p>'; note(-8,''+myAni+'띠와 '+pAni+'띠는 생활 방식이 서로 달라요. 내 기준으로 상대를 바꾸려 하기보다 <b>"저 사람은 저런 스타일이구나"</b> 하고 인정하면 훨씬 편안해져요.'); }
+  else { score += 2; yTxt = '<p>'+myAni+'띠와 '+pAni+'띠는 <b>무난하게 어울리는</b> 조합입니다. 특별히 부딪힐 것도, 극적으로 끌릴 것도 없이 담담하게 잘 지내는 사이예요.</p>'; }
   blocks.push(['띠 궁합 — '+myAni+'띠 & '+pAni+'띠', yTxt]);
 
-  /* 4) 오행 보완 */
-  var iFill=[], pFill=[], e;
+  /* 5) 오행 종합 궁합 (두 사주 합산) */
+  var iFill=[], pFill=[], comb=[0,0,0,0,0], e;
   for(e=0;e<5;e++){
+    comb[e] = me.eleCount[e] + p.eleCount[e];
     if(me.eleCount[e]===0 && p.eleCount[e]>0) iFill.push(SAJU.ELE_NAMES[e]);
     if(p.eleCount[e]===0 && me.eleCount[e]>0) pFill.push(SAJU.ELE_NAMES[e]);
   }
   score += Math.min(10, iFill.length*5) + Math.min(5, pFill.length*3);
   var eTxt;
-  if(iFill.length&&pFill.length) eTxt = '상대는 나에게 없는 '+iFill.join(', ')+'의 기운을, 나는 상대에게 없는 '+pFill.join(', ')+'의 기운을 채워 줍니다. 서로의 빈자리를 메워 주는 상호 보완형 궁합입니다.';
-  else if(iFill.length) eTxt = '상대가 내 사주에 없는 '+iFill.join(', ')+'의 기운을 채워 줍니다. 함께 있을수록 내 운의 균형이 좋아지는 고마운 인연입니다.';
-  else if(pFill.length) eTxt = '내가 상대의 사주에 없는 '+pFill.join(', ')+'의 기운을 채워 줍니다. 상대에게 내가 꼭 필요한 존재라는 뜻입니다.';
-  else eTxt = '두 사람의 오행 구성이 비슷합니다. 서로를 잘 이해하는 만큼, 같은 약점을 조심하면 됩니다.';
-  blocks.push(['오행 보완', eTxt]);
+  if(iFill.length&&pFill.length) eTxt = '<p>상대는 나에게 없는 <b>'+iFill.join('·')+'</b> 기운을, 나는 상대에게 없는 <b>'+pFill.join('·')+'</b> 기운을 채워 줍니다. 서로의 빈자리를 정확히 메워 주는 <b>천생연분형</b> 궁합이에요.</p>';
+  else if(iFill.length) eTxt = '<p>상대가 내 사주에 없는 <b>'+iFill.join('·')+'</b> 기운을 채워 줍니다. 함께 있을수록 내 삶의 균형이 좋아지는, 나에게 <b>득이 되는 인연</b>이에요.</p>';
+  else if(pFill.length) eTxt = '<p>내가 상대의 사주에 없는 <b>'+pFill.join('·')+'</b> 기운을 채워 줍니다. 상대에게 <b>내가 꼭 필요한 존재</b>라는 뜻이에요.</p>';
+  else eTxt = '<p>두 사람의 오행 구성이 비슷합니다. 서로를 깊이 이해하는 만큼, 같은 약점을 함께 조심하면 더없이 든든한 사이가 됩니다.</p>';
+  var combMax=0, cmi=0, combMin=99, cni=0;
+  for(e=0;e<5;e++){ if(comb[e]>combMax){combMax=comb[e];cmi=e;} if(comb[e]<combMin){combMin=comb[e];cni=e;} }
+  eTxt += '<p style="color:var(--sub);font-size:13.5px">두 사람을 합치면 <b>'+SAJU.ELE_NAMES[cmi]+'</b> 기운이 가장 강하고'
+    + (combMin===0 ? ', <b>'+SAJU.ELE_NAMES[cni]+'</b> 기운은 함께 채워 가면 좋아요.' : ', 오행이 고루 갖춰진 균형 잡힌 조합이에요.')+'</p>';
+  blocks.push(['오행 종합 궁합', eTxt]);
 
   score = Math.max(38, Math.min(100, score));
-  var band = score>=90?'하늘이 맺어 준 인연 💫':score>=75?'아주 좋은 궁합 🌸':score>=60?'무난하고 편안한 궁합 🍀':score>=48?'노력하면 좋아지는 궁합 🌱':'서로를 알아 가는 궁합 🌾';
-  var total = score>=75?'함께할수록 서로에게 복이 되는 조합입니다. 좋은 일은 함께 도모하고, 기쁜 날은 함께 보내세요.'
-    :score>=60?'큰 굴곡 없이 오래 가는 인연입니다. 꾸준한 연락과 작은 배려가 이 관계의 보약입니다.'
-    :'처음엔 서로 달라 보여도, 그 다름이 곧 배울 점입니다. 상대의 방식을 인정하는 순간 관계가 한 단계 깊어집니다.';
+
+  /* 6) 관계 맞춤 조언 (성별 조합) */
+  var opposite = (lastGender !== pGen);
+  var relLabel = opposite ? '연인·부부' : '친구·동료';
+  var advTxt;
+  if(opposite){
+    advTxt = score>=75 ? '<p>연인이나 부부로서 <b>서로에게 안식처</b>가 되는 궁합입니다. 표현을 아끼지 않을수록 관계가 깊어지니, 좋은 마음은 그때그때 말로 전하세요.</p>'
+      : score>=60 ? '<p>연인·부부로서 <b>큰 풍파 없이 오래가는</b> 궁합입니다. 설렘보다 편안함이 강점이니, 가끔은 데이트처럼 특별한 이벤트로 설렘을 더해 보세요.</p>'
+      : '<p>연인·부부라면 <b>서로의 다름을 인정하는 것</b>이 관건입니다. 바꾸려 하기보다 있는 그대로 받아들일 때, 이 관계는 의외로 단단하게 오래갑니다.</p>';
+  } else {
+    advTxt = score>=75 ? '<p>친구나 동료로서 <b>평생 갈 인연</b>입니다. 함께 있으면 힘이 나고 일도 잘 풀리니, 곁에 두고 자주 어울릴수록 서로에게 복이 됩니다.</p>'
+      : score>=60 ? '<p>친구·동료로서 <b>편안하고 오래가는</b> 사이입니다. 무리하지 않아도 자연스럽게 이어지는 인연이니, 가끔 안부만 주고받아도 정이 유지됩니다.</p>'
+      : '<p>친구·동료로서 <b>서로 스타일이 다른</b> 사이입니다. 거리감을 존중하며 지내면, 오히려 나에게 없는 것을 배우는 좋은 자극제가 됩니다.</p>';
+  }
+  blocks.push([relLabel+' 관계 조언', advTxt]);
+
+  /* 7) 잘 지내는 비결 */
+  var secret = weakest.tip || '두 분은 큰 갈등 요소가 없는 편안한 궁합이에요. 지금처럼 <b>서로의 좋은 점을 자주 표현</b>하면 이 좋은 기운이 오래 이어져요. 당연하게 여기지 말고 가끔 고마움을 전해 보세요.';
+  blocks.push(['💡 두 사람이 잘 지내는 비결', '<p>'+secret+'</p>']);
+
+  /* ===== 출력 ===== */
+  var band = score>=90?'하늘이 맺어 준 인연 💫':score>=78?'아주 좋은 궁합 🌸':score>=66?'서로 잘 통하는 궁합 🍀':score>=54?'무난하고 편안한 궁합 🌿':score>=46?'노력하면 좋아지는 궁합 🌱':'서로를 알아 가는 궁합 🌾';
+  var total = score>=90?'<b>하늘이 맺어 준 인연</b>이라 할 만큼 조화로운 조합입니다. 서로가 서로에게 복이 되니, 이 인연을 소중히 이어 가세요.'
+    :score>=78?'서로에게 <b>복이 되는 아주 좋은 궁합</b>입니다. 좋은 일은 함께 도모하고 기쁜 날을 함께 보낼수록 운이 커집니다.'
+    :score>=66?'<b>잘 통하고 죽이 맞는</b> 궁합입니다. 대화가 즐겁고 함께 있으면 편안하니, 자주 어울릴수록 관계가 단단해집니다.'
+    :score>=54?'<b>큰 굴곡 없이 오래가는</b> 인연입니다. 화려하진 않아도 담백하게 든든한 사이이니, 꾸준한 관심이 이 관계의 보약입니다.'
+    :'<b>서로 달라서 배우는</b> 관계입니다. 처음엔 낯설어도 상대의 방식을 인정하는 순간, 이 인연은 한 단계 더 깊어집니다.';
 
   var myG = lastGender==='M' ? '♂' : '♀', pG = pGen==='M' ? '♂' : '♀';
   $('gungNames').innerHTML = '<span>'+myName+' '+myG+' <small style="color:var(--sub);font-weight:400">'+me.day.name+'일주</small></span>'
@@ -1507,9 +1551,9 @@ function renderGung(me, p, myName, pName, pGen){
   $('gungNum').textContent = score;
   $('gungBand').textContent = band;
   $('gungBarFill').style.width = score+'%';
-  $('gungTotal').innerHTML = '<b>총평</b><br>'+total;
+  $('gungTotal').innerHTML = '<b>'+relLabel+' 궁합 총평</b><br>'+total;
   $('gungBody').innerHTML = blocks.map(function(b){
-    return '<div class="love-block"><h4>'+b[0]+'</h4><p>'+b[1]+'</p></div>';
+    return '<div class="love-block"><h4>'+b[0]+'</h4>'+b[1]+'</div>';
   }).join('');
   $('gungResult').style.display='block';
 }
