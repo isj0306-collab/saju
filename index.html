@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사주 만세력 · 오늘의 운세</title>
+</head>
+<body style="margin:0">
+<style>
+:root{
+  --bg:#f7f2e7; --card:#fffdf7; --ink:#2b2620; --sub:#6f675c; --line:#e3dbc9;
+  --accent:#9d2c2c; --gold:#a8781c; --tile-ink:#fff;
+  --wood:#2e7d46; --fire:#c0392b; --earth:#c9922a; --metal:#8a8f98; --water:#2c4a8a;
+  --star:#e0a12b; --btn:#9d2c2c; --btn-ink:#fff; --chip:#f1ead9;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#16151a; --card:#201f26; --ink:#eae5da; --sub:#a49b8d; --line:#38353f;
+    --accent:#e07856; --gold:#d4a94e; --chip:#2b2933; --metal:#9aa0ab; }
+}
+:root[data-theme="dark"]{ --bg:#16151a; --card:#201f26; --ink:#eae5da; --sub:#a49b8d; --line:#38353f;
+  --accent:#e07856; --gold:#d4a94e; --chip:#2b2933; --metal:#9aa0ab; }
+:root[data-theme="light"]{ --bg:#f7f2e7; --card:#fffdf7; --ink:#2b2620; --sub:#6f675c; --line:#e3dbc9;
+  --accent:#9d2c2c; --gold:#a8781c; --chip:#f1ead9; --metal:#8a8f98; }
+
+*{box-sizing:border-box}
+body{background:var(--bg)}
+.saju-wrap{max-width:780px;margin:0 auto;padding:24px 16px 60px;color:var(--ink);
+  font-family:"Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif;line-height:1.65}
+.hd{text-align:center;margin:8px 0 26px}
+.hd .sym{font-size:34px;line-height:1}
+.hd h1{margin:8px 0 4px;font-size:26px;letter-spacing:6px;font-weight:800}
+.hd p{margin:0;color:var(--sub);font-size:13.5px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:18px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card h2{margin:0 0 14px;font-size:16px;letter-spacing:1px;color:var(--accent);display:flex;align-items:center;gap:8px}
+.card h2::after{content:"";flex:1;height:1px;background:var(--line)}
+.frm{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:flex-end}
+.fld{display:flex;flex-direction:column;gap:6px}
+.fld label{font-size:12.5px;color:var(--sub);font-weight:700}
+.fld input[type=text],.fld input[type=time],.fld select{
+  padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);
+  font-size:14.5px;font-family:inherit}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{padding:9px 16px;border:0;background:transparent;color:var(--sub);font-size:14px;cursor:pointer;font-family:inherit}
+.seg button.on{background:var(--accent);color:#fff;font-weight:700}
+.chk{display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--sub);cursor:pointer;user-select:none}
+.rowline{display:flex;gap:8px;align-items:center}
+.go{width:100%;margin-top:18px;padding:14px;border:0;border-radius:10px;background:var(--btn);color:var(--btn-ink);
+  font-size:17px;font-weight:800;letter-spacing:4px;cursor:pointer;font-family:inherit}
+.go:hover{filter:brightness(1.08)}
+.err{color:var(--accent);font-size:13.5px;margin-top:10px;display:none}
+
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.chip{background:var(--chip);border-radius:999px;padding:5px 13px;font-size:13px;color:var(--ink)}
+.chip b{color:var(--accent)}
+.pil-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center}
+.pil-grid.no-hour{grid-template-columns:repeat(3,1fr)}
+.pil h3{margin:0 0 8px;font-size:13px;color:var(--sub);letter-spacing:2px}
+.tile{border-radius:10px;padding:10px 4px 8px;color:var(--tile-ink);margin-bottom:6px}
+.tile .hj{font-size:30px;font-weight:800;font-family:"Batang","Nanum Myeongjo",serif;line-height:1.15}
+.tile .hg{font-size:12px;opacity:.92}
+.tile.metal{color:#26251f}
+.tg{font-size:11.5px;color:var(--sub);margin:2px 0 6px;min-height:15px}
+.hid{font-size:11px;color:var(--sub);margin-top:4px}
+.e-wood{background:var(--wood)} .e-fire{background:var(--fire)} .e-earth{background:var(--earth)}
+.e-metal{background:var(--metal)} .e-water{background:var(--water)}
+.t-wood{color:var(--wood)} .t-fire{color:var(--fire)} .t-earth{color:var(--earth)}
+.t-metal{color:var(--metal)} .t-water{color:var(--water)}
+
+.ele-row{display:flex;align-items:center;gap:10px;margin:7px 0}
+.ele-row .nm{width:64px;font-size:13.5px;font-weight:700}
+.ele-row .bar{flex:1;height:14px;background:var(--chip);border-radius:7px;overflow:hidden}
+.ele-row .bar i{display:block;height:100%;border-radius:7px}
+.ele-row .ct{width:26px;text-align:right;font-size:13px;color:var(--sub)}
+.note{font-size:14px;color:var(--ink);margin-top:12px;background:var(--chip);border-radius:10px;padding:12px 14px}
+.note b{color:var(--accent)}
+.yy{display:flex;height:14px;border-radius:7px;overflow:hidden;margin-top:14px}
+.yy i{display:block;height:100%}
+.yy-lab{display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-top:4px}
+
+.ilgan-tit{font-size:15.5px;font-weight:800;margin-bottom:8px}
+.body-txt{font-size:14.5px;margin:0;white-space:pre-line}
+
+.dw-meta{font-size:13.5px;color:var(--sub);margin-bottom:10px}
+.dw-list{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}
+.dw{min-width:64px;text-align:center;border:1px solid var(--line);border-radius:10px;padding:8px 4px;flex-shrink:0}
+.dw .age{font-size:11.5px;color:var(--sub)}
+.dw .gz{font-size:17px;font-weight:800;font-family:"Batang",serif}
+.dw .gzh{font-size:11px;color:var(--sub)}
+
+.tabs{display:flex;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:5;background:var(--bg);
+  padding:10px 0 12px;margin-bottom:4px}
+.tabs button{flex:1;min-width:100px;padding:10px 8px;border:1px solid var(--line);border-radius:999px;
+  background:var(--card);color:var(--sub);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.tabs button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.tab-pane{display:none}
+.tab-pane.on{display:block}
+.cal-head{font-size:13.5px;color:var(--sub);margin-bottom:12px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.cal .wd{font-size:12px;color:var(--sub);font-weight:700;padding:4px 0}
+.cal .wd.sun,.cal .dnum.sun{color:var(--accent)}
+.cal .cell{border:1px solid var(--line);border-radius:8px;padding:5px 2px 4px;min-height:44px}
+.cal .cell.empty{border:0}
+.cal .cell.today{border:2px solid var(--gold);background:var(--chip)}
+.cal .dnum{font-size:13px;font-weight:700}
+.cal .mark{font-size:10.5px;line-height:1.3;margin-top:1px}
+.cal .mark.good{color:var(--wood);font-weight:700}
+.cal .mark.bad{color:var(--accent);font-weight:700}
+.cal-legend{display:flex;gap:14px;margin-top:10px;font-size:12.5px;color:var(--sub);flex-wrap:wrap}
+.cal-legend .good{color:var(--wood);font-weight:700}
+.cal-legend .bad{color:var(--accent);font-weight:700}
+.love-block{margin-bottom:14px}
+.love-block h4{margin:0 0 6px;font-size:14px;color:var(--gold)}
+.love-block p{margin:0;font-size:14.5px}
+.today-date{font-size:13px;color:var(--sub);margin-bottom:12px}
+.fortune-row{display:flex;align-items:baseline;gap:10px;margin:11px 0;flex-wrap:wrap}
+.fortune-row .cat{width:86px;font-weight:800;font-size:14.5px;flex-shrink:0}
+.fortune-row .stars{color:var(--star);letter-spacing:2px;font-size:15px;flex-shrink:0}
+.fortune-row .msg{flex:1;min-width:200px;font-size:14px}
+.lucky{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.total-msg{font-size:15px;background:var(--chip);border-left:4px solid var(--gold);border-radius:8px;padding:12px 14px;margin-bottom:6px}
+.ft{margin-top:26px;text-align:center;color:var(--sub);font-size:12px;line-height:1.8}
+#result{display:none}
+@media (max-width:520px){
+  .tile .hj{font-size:24px}
+  .fortune-row .cat{width:74px}
+}
+@media print{ .card{box-shadow:none} .go,#inputCard{display:none} }
+</style>
+
+<div class="saju-wrap">
+  <div class="hd">
+    <div class="sym">☯</div>
+    <h1>사주 만세력</h1>
+    <p>생년월일시로 보는 사주팔자 · 오행 · 대운 · 오늘의 운세</p>
+  </div>
+
+  <div class="card" id="inputCard">
+    <h2>출생 정보 입력</h2>
+    <div class="frm">
+      <div class="fld"><label>이름 (선택)</label><input type="text" id="inName" placeholder="홍길동" style="width:130px"></div>
+      <div class="fld"><label>성별</label>
+        <div class="seg" id="segGender"><button type="button" data-v="M" class="on">남자</button><button type="button" data-v="F">여자</button></div>
+      </div>
+      <div class="fld"><label>양력 / 음력</label>
+        <div class="rowline">
+          <div class="seg" id="segCal"><button type="button" data-v="S" class="on">양력</button><button type="button" data-v="L">음력</button></div>
+          <label class="chk" id="leapWrap" style="display:none"><input type="checkbox" id="inLeap">윤달</label>
+        </div>
+      </div>
+      <div class="fld"><label>생년월일</label>
+        <div class="rowline">
+          <select id="inY"></select><span>년</span>
+          <select id="inM"></select><span>월</span>
+          <select id="inD"></select><span>일</span>
+        </div>
+      </div>
+      <div class="fld"><label>태어난 시간</label>
+        <div class="rowline">
+          <input type="time" id="inT" value="12:00">
+          <label class="chk"><input type="checkbox" id="inNoTime">시간 모름</label>
+        </div>
+      </div>
+    </div>
+    <button class="go" id="btnGo">사주 보기</button>
+    <div class="err" id="errBox"></div>
+  </div>
+
+  <div id="result">
+    <div class="tabs" id="tabBar">
+      <button type="button" data-tab="paljja" class="on">사주팔자</button>
+      <button type="button" data-tab="today">오늘의 운세</button>
+      <button type="button" data-tab="month">한 달 운세</button>
+      <button type="button" data-tab="love">애정운</button>
+    </div>
+
+    <div class="tab-pane on" id="tab-paljja">
+    <div class="card">
+      <h2>사주 명식 (四柱命式)</h2>
+      <div class="meta" id="metaChips"></div>
+      <div class="pil-grid" id="pilGrid"></div>
+    </div>
+
+    <div class="card">
+      <h2>오행 분석 (五行)</h2>
+      <div id="eleBars"></div>
+      <div class="yy" id="yyBar"></div>
+      <div class="yy-lab"><span id="yyYang"></span><span id="yyYin"></span></div>
+      <div class="note" id="eleNote"></div>
+    </div>
+
+    <div class="card">
+      <h2>일간으로 보는 성격</h2>
+      <div class="ilgan-tit" id="ilganTit"></div>
+      <p class="body-txt" id="ilganTxt"></p>
+    </div>
+
+    <div class="card" id="dwCard">
+      <h2>대운 (大運)</h2>
+      <div class="dw-meta" id="dwMeta"></div>
+      <div class="dw-list" id="dwList"></div>
+    </div>
+    </div>
+
+    <div class="tab-pane" id="tab-today">
+    <div class="card">
+      <h2>오늘의 운세</h2>
+      <div class="today-date" id="todayLine"></div>
+      <div class="total-msg" id="totalMsg"></div>
+      <div id="fortuneRows"></div>
+      <div class="lucky" id="luckyRow"></div>
+    </div>
+    </div>
+
+    <div class="tab-pane" id="tab-month">
+    <div class="card">
+      <h2>이번 달 운세</h2>
+      <div class="cal-head" id="monthLine"></div>
+      <div class="total-msg" id="monthTotal"></div>
+      <div id="monthRows"></div>
+      <div class="cal" id="calGrid" style="margin-top:16px"></div>
+      <div class="cal-legend">
+        <span><span class="good">◎ 길일</span> — 내 사주와 합(合)이 되는 날 (만남·계약·시작에 좋음)</span>
+        <span><span class="bad">△ 주의</span> — 충(沖)이 되는 날 (서두름·다툼 조심)</span>
+      </div>
+    </div>
+    </div>
+
+    <div class="tab-pane" id="tab-love">
+    <div class="card">
+      <h2>애정운 심층 분석</h2>
+      <div id="loveBody"></div>
+    </div>
+    </div>
+  </div>
+
+  <div class="ft">
+    본 결과는 전통 명리학 공식(절기·만세력 기반)으로 계산한 참고용 콘텐츠입니다. 재미로 봐 주세요 🙂<br>
+    절기 경계(입춘 등) 수 분 이내 출생, 1901~2099년 범위 밖은 오차가 있을 수 있습니다. · 시간 기준: 한국표준시(자시 23:30~01:30)
+  </div>
+</div>
+
+<script>
+/* ===== 사주 계산 엔진 ===== */
+var SAJU = (function () {
+  'use strict';
+
+  // 천간·지지
+  var STEMS = ['갑', '을', '병', '정', '무', '기', '경', '신', '임', '계'];
+  var STEMS_H = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+  var BRANCHES = ['자', '축', '인', '묘', '진', '사', '오', '미', '신', '유', '술', '해'];
+  var BRANCHES_H = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+  var STEM_ELE = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4];           // 0목 1화 2토 3금 4수
+  var BRANCH_ELE = [4, 2, 0, 0, 2, 1, 1, 2, 3, 3, 2, 4];
+  var ELE_NAMES = ['목(木)', '화(火)', '토(土)', '금(金)', '수(水)'];
+  var ANIMALS = ['쥐', '소', '호랑이', '토끼', '용', '뱀', '말', '양', '원숭이', '닭', '개', '돼지'];
+  // 지지 본기(십신 판정용) : 자→계 축→기 인→갑 묘→을 진→무 사→병 오→정 미→기 신→경 유→신 술→무 해→임
+  var BRANCH_MAIN = [9, 5, 0, 1, 4, 2, 3, 5, 6, 7, 4, 8];
+  // 지장간(표시용)
+  var HIDDEN = [[8, 9], [9, 7, 5], [4, 2, 0], [0, 1], [1, 9, 4], [4, 6, 2], [2, 5, 3], [3, 1, 5], [4, 8, 6], [6, 7], [7, 3, 4], [4, 0, 8]];
+
+  // ===== 음력 데이터 (1900–2100) =====
+  var LUNAR_INFO = [
+    0x04bd8, 0x04ae0, 0x0a570, 0x054d5, 0x0d260, 0x0d950, 0x16554, 0x056a0, 0x09ad0, 0x055d2,
+    0x04ae0, 0x0a5b6, 0x0a4d0, 0x0d250, 0x1d255, 0x0b540, 0x0d6a0, 0x0ada2, 0x095b0, 0x14977,
+    0x04970, 0x0a4b0, 0x0b4b5, 0x06a50, 0x06d40, 0x1ab54, 0x02b60, 0x09570, 0x052f2, 0x04970,
+    0x06566, 0x0d4a0, 0x0ea50, 0x16a95, 0x05ad0, 0x02b60, 0x186e3, 0x092e0, 0x1c8d7, 0x0c950,
+    0x0d4a0, 0x1d8a6, 0x0b550, 0x056a0, 0x1a5b4, 0x025d0, 0x092d0, 0x0d2b2, 0x0a950, 0x0b557,
+    0x06ca0, 0x0b550, 0x15355, 0x04da0, 0x0a5b0, 0x14573, 0x052b0, 0x0a9a8, 0x0e950, 0x06aa0,
+    0x0aea6, 0x0ab50, 0x04b60, 0x0aae4, 0x0a570, 0x05260, 0x0f263, 0x0d950, 0x05b57, 0x056a0,
+    0x096d0, 0x04dd5, 0x04ad0, 0x0a4d0, 0x0d4d4, 0x0d250, 0x0d558, 0x0b540, 0x0b6a0, 0x195a6,
+    0x095b0, 0x049b0, 0x0a974, 0x0a4b0, 0x0b27a, 0x06a50, 0x06d40, 0x0af46, 0x0ab60, 0x09570,
+    0x04af5, 0x04970, 0x064b0, 0x074a3, 0x0ea50, 0x06b58, 0x05ac0, 0x0ab60, 0x096d5, 0x092e0,
+    0x0c960, 0x0d954, 0x0d4a0, 0x0da50, 0x07552, 0x056a0, 0x0abb7, 0x025d0, 0x092d0, 0x0cab5,
+    0x0a950, 0x0b4a0, 0x0baa4, 0x0ad50, 0x055d9, 0x04ba0, 0x0a5b0, 0x15176, 0x052b0, 0x0a930,
+    0x07954, 0x06aa0, 0x0ad50, 0x05b52, 0x04b60, 0x0a6e6, 0x0a4e0, 0x0d260, 0x0ea65, 0x0d530,
+    0x05aa0, 0x076a3, 0x096d0, 0x04afb, 0x04ad0, 0x0a4d0, 0x1d0b6, 0x0d250, 0x0d520, 0x0dd45,
+    0x0b5a0, 0x056d0, 0x055b2, 0x049b0, 0x0a577, 0x0a4b0, 0x0aa50, 0x1b255, 0x06d20, 0x0ada0,
+    0x14b63, 0x09370, 0x049f8, 0x04970, 0x064b0, 0x168a6, 0x0ea50, 0x06b20, 0x1a6c4, 0x0aae0,
+    0x092e0, 0x0d2e3, 0x0c960, 0x0d557, 0x0d4a0, 0x0da50, 0x05d55, 0x056a0, 0x0a6d0, 0x055d4,
+    0x052d0, 0x0a9b8, 0x0a950, 0x0b4a0, 0x0b6a6, 0x0ad50, 0x055a0, 0x0aba4, 0x0a5b0, 0x052b0,
+    0x0b273, 0x06930, 0x07337, 0x06aa0, 0x0ad50, 0x14b55, 0x04b60, 0x0a570, 0x054e4, 0x0d160,
+    0x0e968, 0x0d520, 0x0daa0, 0x16aa6, 0x056d0, 0x04ae0, 0x0a9d4, 0x0a2d0, 0x0d150, 0x0f252,
+    0x0d520
+  ];
+
+  // ===== 날짜 유틸 =====
+  function jdn(y, m, d) { // 그레고리력 → 율리우스 적일
+    var a = Math.floor((14 - m) / 12), yy = y + 4800 - a, mm = m + 12 * a - 3;
+    return d + Math.floor((153 * mm + 2) / 5) + 365 * yy + Math.floor(yy / 4) - Math.floor(yy / 100) + Math.floor(yy / 400) - 32045;
+  }
+  function jdnToDate(J) {
+    var a = J + 32044, b = Math.floor((4 * a + 3) / 146097), c = a - Math.floor(146097 * b / 4);
+    var d = Math.floor((4 * c + 3) / 1461), e = c - Math.floor(1461 * d / 4), m = Math.floor((5 * e + 2) / 153);
+    return { y: 100 * b + d - 4800 + Math.floor(m / 10), m: m + 3 - 12 * Math.floor(m / 10), d: e - Math.floor((153 * m + 2) / 5) + 1 };
+  }
+  // KST 시각 → 율리우스일(실수)
+  function jdKST(y, m, d, h, min) {
+    return jdn(y, m, d) - 0.5 + (h + min / 60 - 9) / 24;
+  }
+  function jdToKST(jd) {
+    var t = jd + 9 / 24 + 0.5;
+    var J = Math.floor(t), frac = t - J;
+    var date = jdnToDate(J);
+    var mins = Math.round(frac * 1440);
+    if (mins >= 1440) { mins -= 1440; date = jdnToDate(J + 1); }
+    date.h = Math.floor(mins / 60); date.min = mins % 60;
+    return date;
+  }
+
+  // ===== 태양 황경 → 절기 (천문 계산, 오차 ±수 분) =====
+  function sunLon(jd) {
+    var T = (jd - 2451545) / 36525, D = Math.PI / 180;
+    var L0 = 280.46646 + 36000.76983 * T + 0.0003032 * T * T;
+    var M = (357.52911 + 35999.05029 * T - 0.0001537 * T * T) * D;
+    var C = (1.914602 - 0.004817 * T - 0.000014 * T * T) * Math.sin(M)
+      + (0.019993 - 0.000101 * T) * Math.sin(2 * M) + 0.000289 * Math.sin(3 * M);
+    var omega = (125.04 - 1934.136 * T) * D;
+    var lam = (L0 + C - 0.00569 - 0.00478 * Math.sin(omega)) % 360;
+    return lam < 0 ? lam + 360 : lam;
+  }
+  function angDiff(a, b) { var d = (a - b) % 360; if (d < -180) d += 360; if (d > 180) d -= 360; return d; }
+
+  // 12절(節): [황경, 이름, 대략의 월, 일]
+  var TERMS = [
+    [315, '입춘', 2, 4], [345, '경칩', 3, 6], [15, '청명', 4, 5], [45, '입하', 5, 6],
+    [75, '망종', 6, 6], [105, '소서', 7, 7], [135, '입추', 8, 8], [165, '백로', 9, 8],
+    [195, '한로', 10, 8], [225, '입동', 11, 7], [255, '대설', 12, 7], [285, '소한', 1, 6]
+  ];
+  // 절기 시각(율리우스일, KST 아님에 주의: JD 자체는 절대시각)
+  function termJD(year, idx) {
+    var t = TERMS[idx];
+    var guess = jdKST(year, t[2], t[3], 12, 0);
+    var lo = guess - 8, hi = guess + 8;
+    for (var i = 0; i < 50; i++) {
+      var mid = (lo + hi) / 2;
+      if (angDiff(sunLon(mid), t[0]) < 0) lo = mid; else hi = mid;
+    }
+    return (lo + hi) / 2;
+  }
+
+  // ===== 음력 변환 =====
+  function leapMonth(y) { return LUNAR_INFO[y - 1900] & 0xf; }
+  function leapDays(y) { return leapMonth(y) ? ((LUNAR_INFO[y - 1900] & 0x10000) ? 30 : 29) : 0; }
+  function monthDays(y, m) { return (LUNAR_INFO[y - 1900] & (0x10000 >> m)) ? 30 : 29; }
+  function lYearDays(y) {
+    var sum = 348;
+    for (var i = 0x8000; i > 0x8; i >>= 1) sum += (LUNAR_INFO[y - 1900] & i) ? 1 : 0;
+    return sum + leapDays(y);
+  }
+  var BASE_JDN = jdn(1900, 1, 31); // 음력 1900-01-01
+  function lunar2solar(y, m, d, isLeap) {
+    if (y < 1900 || y > 2100) return null;
+    var lm = leapMonth(y);
+    if (isLeap && lm !== m) isLeap = false;
+    if (d > (isLeap ? leapDays(y) : monthDays(y, m))) return null;
+    var offset = 0, i;
+    for (i = 1900; i < y; i++) offset += lYearDays(i);
+    for (i = 1; i < m; i++) { offset += monthDays(y, i); if (lm && i === lm) offset += leapDays(y); }
+    if (isLeap) offset += monthDays(y, m);
+    return jdnToDate(BASE_JDN + offset + d - 1);
+  }
+  function solar2lunar(y, m, d) {
+    var offset = jdn(y, m, d) - BASE_JDN;
+    if (offset < 0) return null;
+    var ly = 1900, days;
+    while (ly < 2101 && offset >= (days = lYearDays(ly))) { offset -= days; ly++; }
+    var lm = leapMonth(ly), month = 1, isLeap = false;
+    for (;;) {
+      days = isLeap ? leapDays(ly) : monthDays(ly, month);
+      if (offset < days) break;
+      offset -= days;
+      if (!isLeap && month === lm) { isLeap = true; }
+      else { isLeap = false; month++; }
+    }
+    return { y: ly, m: month, d: offset + 1, isLeap: isLeap };
+  }
+
+  // ===== 간지 유틸 =====
+  function gzIndex(stem, branch) { return ((6 * stem - 5 * branch) % 60 + 60) % 60; }
+  function gzName(idx) { return STEMS[idx % 10] + BRANCHES[idx % 12]; }
+  function gzHanja(idx) { return STEMS_H[idx % 10] + BRANCHES_H[idx % 12]; }
+
+  // 십신
+  var TEN_GODS = [['비견', '겁재'], ['식신', '상관'], ['편재', '정재'], ['편관', '정관'], ['편인', '정인']];
+  function tenGod(dayStem, otherStem) {
+    var rel = (STEM_ELE[otherStem] - STEM_ELE[dayStem] + 5) % 5;
+    var same = (dayStem % 2) === (otherStem % 2);
+    return TEN_GODS[rel][same ? 0 : 1];
+  }
+
+  // ===== 사주 계산 본체 =====
+  // input: {y,m,d,h,min, isLunar, isLeap, gender('M'|'F'), unknownTime}
+  function compute(input) {
+    var sy = input.y, sm = input.m, sd = input.d;
+    var lunarEcho = null, solarEcho = null;
+    if (input.isLunar) {
+      var s = lunar2solar(input.y, input.m, input.d, !!input.isLeap);
+      if (!s) return { error: '음력 날짜가 올바르지 않습니다. (해당 월의 날짜 범위 또는 윤달 여부를 확인해 주세요)' };
+      sy = s.y; sm = s.m; sd = s.d;
+      lunarEcho = { y: input.y, m: input.m, d: input.d, isLeap: !!input.isLeap };
+    } else {
+      lunarEcho = solar2lunar(sy, sm, sd);
+    }
+    solarEcho = { y: sy, m: sm, d: sd };
+    if (sy < 1901 || sy > 2099) return { error: '지원 범위는 1901년 ~ 2099년(양력 기준)입니다.' };
+
+    var h = input.unknownTime ? 12 : input.h, min = input.unknownTime ? 0 : input.min;
+    var birthJD = jdKST(sy, sm, sd, h, min);
+
+    // 일주: 23:30 이후 출생은 다음 날 자시로 계산
+    var effJdn = jdn(sy, sm, sd);
+    if (!input.unknownTime && (h * 60 + min) >= 23 * 60 + 30) effJdn += 1;
+    var dayIdx = ((effJdn + 49) % 60 + 60) % 60;
+    var dayStem = dayIdx % 10, dayBranch = dayIdx % 12;
+
+    // 년주: 입춘 기준
+    var sajuYear = sy;
+    if (birthJD < termJD(sy, 0)) sajuYear = sy - 1;
+    var yearStem = ((sajuYear - 4) % 10 + 10) % 10;
+    var yearBranch = ((sajuYear - 4) % 12 + 12) % 12;
+
+    // 월주: 절기(節) 기준 — 출생 직전의 절 찾기
+    var termList = [], yy, ti;
+    for (yy = sy - 1; yy <= sy + 1; yy++) {
+      for (ti = 0; ti < 12; ti++) {
+        var t = TERMS[ti];
+        var termYear = yy; // 소한(1월)은 해당 연도 1월
+        termList.push({ jd: termJD(termYear, ti), idx: ti });
+      }
+    }
+    termList.sort(function (a, b) { return a.jd - b.jd; });
+    var prev = null, next = null;
+    for (ti = 0; ti < termList.length; ti++) {
+      if (termList[ti].jd <= birthJD) prev = termList[ti];
+      else { next = termList[ti]; break; }
+    }
+    // 절 → 월지: 입춘→인(2) … 대설→자(0) 소한→축(1)
+    var TERM_BRANCH = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 1];
+    var monthBranch = TERM_BRANCH[prev.idx];
+    var monthOffset = (monthBranch - 2 + 12) % 12; // 인월=0 … 축월=11
+    var monthStem = ((yearStem % 5) * 2 + 2 + monthOffset) % 10;
+    var monthIdx = gzIndex(monthStem, monthBranch);
+
+    // 시주
+    var hourBranch = null, hourStem = null;
+    if (!input.unknownTime) {
+      var mins = h * 60 + min;
+      hourBranch = Math.floor((((mins - (23 * 60 + 30)) % 1440 + 1440) % 1440) / 120);
+      hourStem = ((dayStem % 5) * 2 + hourBranch) % 10;
+    }
+
+    // 오행 분포
+    var eleCount = [0, 0, 0, 0, 0];
+    var stems = [yearStem, monthStem, dayStem], branches = [yearBranch, monthBranch, dayBranch];
+    if (hourStem !== null) { stems.push(hourStem); branches.push(hourBranch); }
+    stems.forEach(function (st) { eleCount[STEM_ELE[st]]++; });
+    branches.forEach(function (br) { eleCount[BRANCH_ELE[br]]++; });
+
+    // 음양 개수 (천간 짝수 index = 양)
+    var yang = 0, total = stems.length + branches.length;
+    stems.forEach(function (st) { if (st % 2 === 0) yang++; });
+    branches.forEach(function (br) { if (br % 2 === 0) yang++; });
+
+    // 대운
+    var daewoon = null;
+    if (input.gender) {
+      var forward = (yearStem % 2 === 0) === (input.gender === 'M'); // 양남·음녀 순행
+      var gapDays = forward ? (next.jd - birthJD) : (birthJD - prev.jd);
+      var startAge = Math.max(1, Math.round(gapDays / 3));
+      var list = [];
+      for (var i = 1; i <= 8; i++) {
+        var idx = ((monthIdx + (forward ? i : -i)) % 60 + 60) % 60;
+        list.push({ age: startAge + 10 * (i - 1), idx: idx });
+      }
+      daewoon = { forward: forward, startAge: startAge, list: list };
+    }
+
+    function pillar(st, br) {
+      return {
+        stem: st, branch: br,
+        name: STEMS[st] + BRANCHES[br], hanja: STEMS_H[st] + BRANCHES_H[br],
+        stemGod: tenGod(dayStem, st), branchGod: tenGod(dayStem, BRANCH_MAIN[br]),
+        hidden: HIDDEN[br]
+      };
+    }
+
+    return {
+      solar: solarEcho, lunar: lunarEcho, unknownTime: !!input.unknownTime,
+      year: pillar(yearStem, yearBranch),
+      month: pillar(monthStem, monthBranch),
+      day: pillar(dayStem, dayBranch),
+      hour: input.unknownTime ? null : pillar(hourStem, hourBranch),
+      animal: ANIMALS[yearBranch],
+      eleCount: eleCount, yang: yang, total: total,
+      daewoon: daewoon,
+      dayIdx: dayIdx
+    };
+  }
+
+  // 오늘의 일진
+  function todayGZ(y, m, d) {
+    var idx = ((jdn(y, m, d) + 49) % 60 + 60) % 60;
+    return { idx: idx, stem: idx % 10, branch: idx % 12, name: gzName(idx), hanja: gzHanja(idx) };
+  }
+
+  return {
+    STEMS: STEMS, STEMS_H: STEMS_H, BRANCHES: BRANCHES, BRANCHES_H: BRANCHES_H,
+    STEM_ELE: STEM_ELE, BRANCH_ELE: BRANCH_ELE, ELE_NAMES: ELE_NAMES, ANIMALS: ANIMALS,
+    jdn: jdn, jdToKST: jdToKST, termJD: termJD, TERMS: TERMS,
+    lunar2solar: lunar2solar, solar2lunar: solar2lunar,
+    gzName: gzName, gzHanja: gzHanja, tenGod: tenGod,
+    compute: compute, todayGZ: todayGZ
+  };
+})();
+if (typeof module !== 'undefined') module.exports = SAJU;
+
+</script>
+<script>
+(function(){
+'use strict';
+var $ = function(id){ return document.getElementById(id); };
+var ELE_CLS = ['wood','fire','earth','metal','water'];
+var ELE_KO = ['목','화','토','금','수'];
+
+/* ---------- 해석 텍스트 ---------- */
+var ILGAN_DESC = {
+  0:['갑목(甲木) — 곧게 자라는 큰 나무','우직하게 앞으로 나아가는 리더형입니다. 자존심과 책임감이 강하고, 한번 정한 목표는 끝까지 밀어붙이는 추진력이 있습니다. 다만 융통성이 부족해 꺾일지언정 굽히지 않으려는 고집이 갈등을 만들 수 있으니, 때로는 바람에 몸을 맡기는 유연함이 필요합니다.'],
+  1:['을목(乙木) — 부드럽게 뻗는 덩굴과 화초','환경에 맞춰 유연하게 적응하는 실속형입니다. 겉은 부드럽지만 속은 끈질겨서, 어떤 상황에서도 살아남는 생활력과 사교성이 돋보입니다. 다만 주변에 기대려는 마음이 커지면 우유부단해 보일 수 있으니, 스스로 결정하는 연습이 운을 키웁니다.'],
+  2:['병화(丙火) — 세상을 비추는 태양','밝고 화통하며 어디서든 존재감이 빛나는 태양 같은 사람입니다. 열정과 표현력이 뛰어나 사람을 모으는 힘이 있고, 숨기는 것 없이 정정당당한 것을 좋아합니다. 다만 감정의 기복이 크고 뒷심이 약해질 수 있으니, 꾸준함을 더하면 크게 성취합니다.'],
+  3:['정화(丁火) — 어둠을 밝히는 촛불과 등불','섬세하고 따뜻하며 헌신적인 사람입니다. 겉은 조용해도 내면의 열정은 오래 타오르는 은근한 끈기가 있고, 배려심이 깊어 주변의 신뢰를 얻습니다. 다만 속마음을 잘 드러내지 않아 혼자 끙끙 앓기 쉬우니, 감정을 표현하는 용기가 필요합니다.'],
+  4:['무토(戊土) — 우뚝 솟은 큰 산','듬직하고 신용을 중시하는 큰 산 같은 사람입니다. 쉽게 흔들리지 않는 중심이 있어 주변 사람들이 기대고 싶어 하고, 포용력과 중재 능력이 뛰어납니다. 다만 변화를 싫어하고 고집이 세질 수 있으니, 새로운 흐름을 받아들이는 열린 자세가 복을 부릅니다.'],
+  5:['기토(己土) — 만물을 기르는 기름진 논밭','부드럽고 성실하며 실속 있게 결실을 만드는 사람입니다. 남을 키우고 돌보는 데 재능이 있어 교육·양육·관리에 강하고, 겉으로 드러내지 않는 꼼꼼함이 있습니다. 다만 속을 알 수 없다는 말을 들을 수 있으니, 가까운 사람에게는 마음을 열어 보이세요.'],
+  6:['경금(庚金) — 단단한 무쇠와 바위','결단력과 의리가 있는 강철 같은 사람입니다. 옳고 그름이 분명하고 한번 맺은 인연에는 끝까지 의리를 지키며, 위기에서 오히려 강해지는 승부사 기질이 있습니다. 다만 직설적인 말투가 상처를 줄 수 있으니, 칼날을 다듬듯 표현을 다듬으면 큰 그릇이 됩니다.'],
+  7:['신금(辛金) — 세공된 보석과 예리한 칼','섬세하고 예리하며 완벽을 추구하는 보석 같은 사람입니다. 미적 감각과 분석력이 뛰어나 전문 분야에서 빛을 발하고, 자기 관리가 철저합니다. 다만 자존심이 상하면 오래 마음에 담아두는 편이니, 스스로에게도 남에게도 조금 너그러워지면 인생이 편안해집니다.'],
+  8:['임수(壬水) — 도도히 흐르는 큰 강과 바다','스케일이 크고 지혜로운 바다 같은 사람입니다. 생각이 깊고 포용력이 있어 다양한 사람과 어울리며, 새로운 지식과 변화를 즐기는 자유로운 영혼입니다. 다만 한곳에 정착하지 못하고 흘러 다니기 쉬우니, 목표라는 둑을 세우면 큰물이 큰일을 이룹니다.'],
+  9:['계수(癸水) — 촉촉이 스며드는 빗물과 이슬','감수성이 풍부하고 총명한 사람입니다. 조용히 스며들어 어느새 핵심에 닿아 있는 통찰력과 직관이 있고, 순수하고 여린 마음으로 주변을 적셔 줍니다. 다만 생각이 많아 걱정도 많은 편이니, 머리로 재기보다 일단 시작하는 행동력이 운을 틔웁니다.']
+};
+var ELE_LACK = {
+  0:'목(木)이 부족하면 시작하는 힘과 추진력이 아쉬울 수 있습니다. 초록색 소품, 식물 키우기, 아침 산책이 기운을 보충해 줍니다.',
+  1:'화(火)가 부족하면 열정과 표현력이 아쉬울 수 있습니다. 붉은색 포인트, 햇볕 쬐기, 적당한 운동으로 온기를 더해 보세요.',
+  2:'토(土)가 부족하면 꾸준함과 안정감이 아쉬울 수 있습니다. 노란색·황토색 소품, 규칙적인 생활 습관이 중심을 잡아 줍니다.',
+  3:'금(金)이 부족하면 결단력과 마무리가 아쉬울 수 있습니다. 흰색·금속 소품, 정리정돈 습관이 맺고 끊는 힘을 길러 줍니다.',
+  4:'수(水)가 부족하면 유연함과 지혜의 흐름이 아쉬울 수 있습니다. 검정·파랑 소품, 충분한 수분 섭취와 독서가 도움이 됩니다.'
+};
+var ELE_MUCH = {
+  0:'목(木)이 강해 성장 욕구와 추진력이 넘칩니다. 다만 뻗기만 하면 부러지기 쉬우니 완급 조절이 관건입니다.',
+  1:'화(火)가 강해 열정과 존재감이 넘칩니다. 다만 불이 과하면 스스로를 태우니, 휴식과 마음 다스리기가 중요합니다.',
+  2:'토(土)가 강해 신중함과 뚝심이 넘칩니다. 다만 흙이 쌓이면 고집이 되니, 변화를 받아들이는 유연함이 필요합니다.',
+  3:'금(金)이 강해 결단력과 원칙이 뚜렷합니다. 다만 날이 서면 주변이 다칠 수 있으니, 부드러운 말 한마디가 보약입니다.',
+  4:'수(水)가 강해 지혜와 융통성이 넘칩니다. 다만 물이 넘치면 방향을 잃으니, 목표를 정해 흐름을 모으는 것이 좋습니다.'
+};
+
+var CATS = ['재물운','애정운','건강운','직장·학업운'];
+var MSGS = {
+  '재물운':[
+    ['지갑이 얇아지기 쉬운 날입니다. 오늘만큼은 충동구매 버튼에서 손을 떼세요.','금전 거래나 보증은 피하는 게 좋습니다. 지키는 것이 버는 것입니다.'],
+    ['큰 지출은 미루는 편이 좋습니다. 가격 비교가 뜻밖의 절약을 만듭니다.','들어오는 돈보다 나가는 돈이 빠른 날입니다. 가계부를 열어 보세요.'],
+    ['평온한 흐름입니다. 계획한 소비는 무리가 없고, 저축 습관이 미래의 복이 됩니다.','무리하지 않으면 잃을 일도 없는 날입니다. 현상 유지가 곧 이득입니다.'],
+    ['재물의 흐름이 순조롭습니다. 미뤄 둔 정산이나 협상을 진행하기 좋은 날입니다.','작은 부수입이나 좋은 정보가 들어올 수 있습니다. 주변의 이야기에 귀를 기울여 보세요.'],
+    ['재물운이 활짝 열렸습니다. 오래 준비한 일이라면 오늘 결실을 노려 볼 만합니다.','귀인이 재물의 문을 열어 주는 날입니다. 감사 인사를 잊지 마세요.']
+  ],
+  '애정운':[
+    ['오해가 생기기 쉬운 날입니다. 농담 한마디도 오늘은 한 번 더 생각하고 건네세요.','서운함을 쌓아 두면 커집니다. 다툼은 짧게, 화해는 빠르게가 답입니다.'],
+    ['상대의 말투에 예민해질 수 있습니다. 문자보다는 목소리로 대화해 보세요.','기대가 크면 실망도 큽니다. 오늘은 상대를 있는 그대로 바라봐 주세요.'],
+    ['잔잔한 호수 같은 날입니다. 특별한 이벤트보다 소소한 안부가 마음을 데워 줍니다.','평범함 속에 정이 쌓이는 날입니다. 함께하는 식사 한 끼가 보약입니다.'],
+    ['마음이 통하는 기분 좋은 날입니다. 솔직한 표현이 관계를 한 뼘 더 가깝게 만듭니다.','인연의 기운이 좋은 날입니다. 새로운 만남이든 오랜 인연이든 먼저 연락해 보세요.'],
+    ['사랑의 별이 밝게 빛나는 날입니다. 고백, 프러포즈, 화해 무엇이든 통하는 하루입니다.','당신의 매력이 유난히 빛나는 날입니다. 자신 있게 마음을 표현해 보세요.']
+  ],
+  '건강운':[
+    ['몸이 보내는 신호를 무시하지 마세요. 무리한 일정은 과감히 줄이는 게 상책입니다.','피로가 누적되기 쉬운 날입니다. 오늘은 일찍 잠자리에 드세요.'],
+    ['목과 어깨가 뭉치기 쉽습니다. 한 시간에 한 번은 일어나 기지개를 켜세요.','찬 음식과 과식은 피하세요. 속이 편해야 하루가 편합니다.'],
+    ['무난한 컨디션입니다. 가벼운 스트레칭과 충분한 물이 좋은 흐름을 지켜 줍니다.','큰 탈은 없는 날입니다. 다만 밤늦은 야식은 내일의 몸이 갚게 됩니다.'],
+    ['활력이 차오르는 날입니다. 미뤄 둔 운동을 시작하기에 더없이 좋습니다.','몸도 마음도 가벼운 하루입니다. 산책이 좋은 아이디어까지 데려다줄 것입니다.'],
+    ['컨디션 최상의 날입니다. 중요한 일정을 소화하기에 완벽한 몸 상태입니다.','기운이 넘치는 날입니다. 그 에너지를 좋은 습관 만들기에 써 보세요.']
+  ],
+  '직장·학업운':[
+    ['실수가 나오기 쉬운 날입니다. 제출 전에 한 번 더 검토하는 습관이 당신을 지킵니다.','중요한 결정은 하루 미루세요. 오늘의 판단은 내일 다시 보면 다르게 보입니다.'],
+    ['집중력이 흐트러지기 쉽습니다. 큰일보다는 밀린 잔일을 정리하기 좋은 날입니다.','윗사람과의 마찰을 조심하세요. 한 발 물러서는 것이 이기는 길입니다.'],
+    ['맡은 일을 담담히 해내기 좋은 날입니다. 꾸준함이 곧 실력으로 쌓입니다.','평범한 하루지만 기본기를 다지기엔 최적입니다. 복습과 정리의 힘을 믿으세요.'],
+    ['능률이 오르는 날입니다. 어려운 과제일수록 오전에 붙잡으면 술술 풀립니다.','당신의 노력이 눈에 띄는 날입니다. 회의나 발표에서 목소리를 내 보세요.'],
+    ['성취의 기운이 가득한 날입니다. 시험, 발표, 계약 모두 밀어붙여 볼 만합니다.','귀인의 도움으로 일이 크게 풀리는 날입니다. 협력 제안을 놓치지 마세요.']
+  ]
+};
+var TOTAL_MSG = [
+  '오늘은 속도를 줄이고 안전 운전해야 하는 날입니다. 서두르지 않으면 잃을 것도 없습니다.',
+  '작은 어긋남이 있을 수 있으나 크게 번질 운은 아닙니다. 겸손과 신중함이 오늘의 부적입니다.',
+  '무난하고 평온한 하루입니다. 일상의 리듬을 지키는 것만으로 충분히 좋은 날입니다.',
+  '기분 좋은 흐름이 함께하는 날입니다. 미뤄 둔 일을 하나씩 꺼내기 좋습니다.',
+  '하늘이 돕는 상승운의 날입니다. 자신감을 갖고 원하는 것을 향해 나아가세요.'
+];
+var MONTH_TOTAL = [
+  '이번 달은 무리한 확장보다 정리와 재정비에 어울리는 달입니다. 속도를 늦추면 잃을 것이 없습니다.',
+  '크고 작은 변수가 있는 달이지만 신중하게 움직이면 무난히 지나갑니다. 중요한 결정은 달 후반으로 미루세요.',
+  '평온한 흐름의 달입니다. 일상 루틴을 지키며 기본기를 다지기에 좋은 시기입니다.',
+  '기회의 문이 열리는 달입니다. 미뤄 둔 계획을 꺼내고, 만남과 제안에 적극적으로 응해 보세요.',
+  '모든 일에 탄력이 붙는 상승운의 달입니다. 시작, 계약, 도전 무엇이든 밀어붙이기 좋은 시기입니다.'
+];
+var MONTH_CATS = ['재물운','애정운','직장·학업운'];
+var MONTH_MSGS = {
+  '재물운':[
+    '큰 지출과 투자는 피해야 하는 달입니다. 이번 달의 목표는 불리기보다 지키기입니다.',
+    '예상 밖의 지출이 생기기 쉬운 달입니다. 고정비를 점검하면 새는 돈이 보입니다.',
+    '들어오고 나가는 것이 균형을 이루는 달입니다. 계획적인 소비라면 무리가 없습니다.',
+    '재물의 흐름이 좋아지는 달입니다. 협상, 연봉, 정산 등 돈 이야기를 꺼내기 좋습니다.',
+    '재물운이 크게 트이는 달입니다. 준비된 투자나 확장이라면 좋은 결실을 기대할 만합니다.'
+  ],
+  '애정운':[
+    '감정의 골이 생기기 쉬운 달입니다. 이기려 하기보다 들어 주는 쪽이 관계를 지킵니다.',
+    '사소한 오해가 생길 수 있는 달입니다. 확인하지 않은 추측은 접어 두세요.',
+    '잔잔하게 정이 쌓이는 달입니다. 특별함보다 꾸준함이 사랑을 키웁니다.',
+    '설렘이 찾아오는 달입니다. 새로운 만남도, 오랜 관계의 재발견도 기대해 볼 만합니다.',
+    '애정운이 만개하는 달입니다. 고백과 프러포즈, 상견례 같은 큰 걸음에 좋은 시기입니다.'
+  ],
+  '직장·학업운':[
+    '구설과 실수를 조심해야 하는 달입니다. 문서와 말은 두 번 확인이 부적입니다.',
+    '업무가 더디게 느껴질 수 있는 달입니다. 성과보다 관계 관리에 힘쓰면 뒤가 편합니다.',
+    '맡은 일을 착실히 해내기 좋은 달입니다. 쌓인 신뢰가 다음 기회의 발판이 됩니다.',
+    '능력을 인정받는 달입니다. 발표, 시험, 면접 등 자신을 보여 줄 자리를 피하지 마세요.',
+    '승진, 합격, 성사의 기운이 강한 달입니다. 목표를 높게 잡아도 좋은 시기입니다.'
+  ]
+};
+var LOVE_STYLE = {
+  '비견':'연인에게도 친구 같은 편안함을 주는 스타일입니다. 대등한 관계를 원해서 간섭받는 것은 싫어하지만, 한번 마음을 주면 의리 있게 곁을 지킵니다.',
+  '겁재':'밀당보다는 직진, 좋아하면 적극적으로 표현하는 스타일입니다. 다만 경쟁심이 연애에서도 발동하면 다툼이 잦아질 수 있으니 져 주는 여유가 필요합니다.',
+  '식신':'함께 맛있는 것을 먹고 소소한 일상을 나누는 데서 행복을 느끼는 다정한 스타일입니다. 표현이 자연스러워 상대를 편안하게 해 줍니다.',
+  '상관':'재치 있고 매력적이라 이성의 관심을 많이 받는 스타일입니다. 다만 상대의 단점이 눈에 잘 들어와 말로 상처를 줄 수 있으니 한 번 걸러 말하는 습관이 좋습니다.',
+  '편재':'화끈하고 스케일 있게 애정을 표현하는 스타일입니다. 인기가 많고 연애 기회도 많지만, 마음이 여러 곳에 흩어지지 않도록 중심을 잡는 것이 중요합니다.',
+  '정재':'한 사람에게 꾸준하고 성실한, 믿음직한 연애를 하는 스타일입니다. 화려한 이벤트보다 안정적인 미래를 함께 그려 주는 것이 당신의 애정 표현입니다.',
+  '편관':'카리스마 있는 상대에게 끌리고, 연애에도 긴장감과 드라마가 있는 스타일입니다. 밀도 높은 사랑을 하지만 스스로를 너무 몰아붙이지 않아야 오래갑니다.',
+  '정관':'예의와 신뢰를 지키는 모범적인 연애 스타일입니다. 가볍게 만나기보다 오래갈 인연을 염두에 둔 진지한 만남을 선호하고, 책임감 있게 관계를 지킵니다.',
+  '편인':'독특한 감성과 정신적 교감을 중시하는 스타일입니다. 겉으로는 무심해 보여도 마음속 온도는 높으니, 표현을 조금만 늘리면 오해가 줄어듭니다.',
+  '정인':'보살펴 주고 보살핌 받는 따뜻한 애정을 원하는 스타일입니다. 헌신적인 사랑을 하지만 받기만 하는 상대라면 지치기 쉬우니 균형을 살피세요.'
+};
+var LUCK_COLOR = ['초록색','빨간색','노란색','흰색','파란색·검정색'];
+var LUCK_DIR = ['동쪽','남쪽','중앙(익숙한 곳)','서쪽','북쪽'];
+
+/* 지지 관계 */
+var YUKHAP = {0:1,1:0,2:11,11:2,3:10,10:3,4:9,9:4,5:8,8:5,6:7,7:6};
+var SAMHAP = [[2,6,10],[5,9,1],[8,0,4],[11,3,7]];
+
+/* ---------- 유틸 ---------- */
+function xmur3(str){var h=1779033703^str.length;for(var i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19;}
+  return function(){h=Math.imul(h^(h>>>16),2246822507);h=Math.imul(h^(h>>>13),3266489909);return (h^=h>>>16)>>>0;};}
+function mulberry32(a){return function(){a|=0;a=(a+0x6D2B79F5)|0;var t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return ((t^(t>>>14))>>>0)/4294967296;};}
+function stars(n){var s='';for(var i=1;i<=5;i++)s+= i<=n?'★':'☆';return s;}
+function pad(n){return (n<10?'0':'')+n;}
+
+/* ---------- 입력 폼 ---------- */
+var gender='M', cal='S';
+function segInit(id, fn){
+  var seg=$(id);
+  seg.addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b)return;
+    seg.querySelectorAll('button').forEach(function(x){x.classList.remove('on');});
+    b.classList.add('on'); fn(b.dataset.v);
+  });
+}
+segInit('segGender',function(v){gender=v;});
+segInit('segCal',function(v){cal=v; $('leapWrap').style.display = v==='L'?'flex':'none';});
+
+(function fillSelects(){
+  var now=new Date(), ys=$('inY'), ms=$('inM'), ds=$('inD'), i, o;
+  for(i=now.getFullYear(); i>=1901; i--){o=document.createElement('option');o.value=i;o.textContent=i;ys.appendChild(o);}
+  ys.value=1990;
+  for(i=1;i<=12;i++){o=document.createElement('option');o.value=i;o.textContent=i;ms.appendChild(o);}
+  for(i=1;i<=31;i++){o=document.createElement('option');o.value=i;o.textContent=i;ds.appendChild(o);}
+})();
+$('inNoTime').addEventListener('change',function(){ $('inT').disabled=this.checked; });
+
+/* ---------- 렌더링 ---------- */
+function tileHTML(stemOrBranch, isStem){
+  var hj = isStem? SAJU.STEMS_H[stemOrBranch] : SAJU.BRANCHES_H[stemOrBranch];
+  var hg = isStem? SAJU.STEMS[stemOrBranch] : SAJU.BRANCHES[stemOrBranch];
+  var ele = isStem? SAJU.STEM_ELE[stemOrBranch] : SAJU.BRANCH_ELE[stemOrBranch];
+  var yy = (stemOrBranch%2===0)?'양':'음';
+  return '<div class="tile e-'+ELE_CLS[ele]+(ele===3?' metal':'')+'"><div class="hj">'+hj+'</div><div class="hg">'+hg+' · '+yy+ELE_KO[ele]+'</div></div>';
+}
+function pillarHTML(title, p, isDay){
+  var hidden = p.hidden.map(function(s){return SAJU.STEMS_H[s];}).join('·');
+  return '<div class="pil"><h3>'+title+'</h3>'
+    +'<div class="tg">'+(isDay?'본원(나)':p.stemGod)+'</div>'+tileHTML(p.stem,true)
+    +tileHTML(p.branch,false)+'<div class="tg">'+p.branchGod+'</div>'
+    +'<div class="hid">지장간 '+hidden+'</div></div>';
+}
+
+function render(r, name){
+  /* 명식 */
+  var chips = [];
+  chips.push('양력 <b>'+r.solar.y+'.'+pad(r.solar.m)+'.'+pad(r.solar.d)+'</b>');
+  if(r.lunar) chips.push('음력 <b>'+(r.lunar.isLeap?'윤':'')+r.lunar.m+'월 '+r.lunar.d+'일</b>');
+  chips.push('띠 <b>'+r.animal+'띠</b>');
+  chips.push('일주 <b>'+r.day.name+'('+r.day.hanja+')</b>');
+  if(name) chips.unshift('<b>'+name+'</b>님 ('+(gender==='M'?'남':'여')+')');
+  $('metaChips').innerHTML = chips.map(function(c){return '<span class="chip">'+c+'</span>';}).join('');
+
+  var g=$('pilGrid');
+  g.className = 'pil-grid'+(r.hour?'':' no-hour');
+  var html='';
+  if(r.hour) html += pillarHTML('시주 時柱', r.hour, false);
+  html += pillarHTML('일주 日柱', r.day, true);
+  html += pillarHTML('월주 月柱', r.month, false);
+  html += pillarHTML('년주 年柱', r.year, false);
+  g.innerHTML = html;
+
+  /* 오행 */
+  var maxC = Math.max.apply(null, r.eleCount) || 1, bars='';
+  for(var e=0;e<5;e++){
+    bars += '<div class="ele-row"><span class="nm t-'+ELE_CLS[e]+'">'+SAJU.ELE_NAMES[e]+'</span>'
+      +'<div class="bar"><i class="e-'+ELE_CLS[e]+'" style="width:'+(r.eleCount[e]/maxC*100)+'%"></i></div>'
+      +'<span class="ct">'+r.eleCount[e]+'</span></div>';
+  }
+  $('eleBars').innerHTML = bars;
+  var yangPct = Math.round(r.yang/r.total*100);
+  $('yyBar').innerHTML = '<i style="width:'+yangPct+'%;background:var(--fire)"></i><i style="width:'+(100-yangPct)+'%;background:var(--water)"></i>';
+  $('yyYang').textContent = '양(陽) '+r.yang+'개 · '+yangPct+'%';
+  $('yyYin').textContent = '음(陰) '+(r.total-r.yang)+'개 · '+(100-yangPct)+'%';
+
+  var lacks=[], much=-1, muchV=-1;
+  for(e=0;e<5;e++){ if(r.eleCount[e]===0) lacks.push(e); if(r.eleCount[e]>muchV){muchV=r.eleCount[e];much=e;} }
+  var noteHtml = '<b>'+SAJU.ELE_NAMES[much]+'</b>의 기운이 가장 강한 사주입니다. '+ELE_MUCH[much];
+  if(lacks.length){
+    noteHtml += '<br><br>사주에 없는 오행: <b>'+lacks.map(function(e){return SAJU.ELE_NAMES[e];}).join(', ')+'</b><br>'
+      + lacks.map(function(e){return ELE_LACK[e];}).join(' ');
+  } else {
+    noteHtml += '<br><br>다섯 가지 오행을 모두 갖춘, 균형이 좋은 사주입니다.';
+  }
+  $('eleNote').innerHTML = noteHtml;
+
+  /* 일간 */
+  var d = ILGAN_DESC[r.day.stem];
+  $('ilganTit').textContent = '당신의 일간(日干)은 '+d[0]+' 입니다';
+  $('ilganTit').className = 'ilgan-tit t-'+ELE_CLS[SAJU.STEM_ELE[r.day.stem]];
+  $('ilganTxt').textContent = d[1] + (r.unknownTime ? '\n\n※ 태어난 시간을 모르는 경우 시주(時柱)를 제외한 삼주(三柱)로 계산했습니다.' : '');
+
+  /* 대운 */
+  if(r.daewoon){
+    $('dwCard').style.display='';
+    $('dwMeta').textContent = (r.daewoon.forward?'순행':'역행')+' 대운 · 대운수 '+r.daewoon.startAge
+      +' — 만 '+r.daewoon.startAge+'세 무렵부터 10년 주기로 큰 흐름이 바뀝니다.';
+    $('dwList').innerHTML = r.daewoon.list.map(function(x){
+      var st=x.idx%10, br=x.idx%12;
+      return '<div class="dw"><div class="age">'+x.age+'세~</div><div class="gz"><span class="t-'+ELE_CLS[SAJU.STEM_ELE[st]]+'">'+SAJU.STEMS[st]+'</span><span class="t-'+ELE_CLS[SAJU.BRANCH_ELE[br]]+'">'+SAJU.BRANCHES[br]+'</span></div><div class="gzh">'+SAJU.gzHanja(x.idx)+'</div></div>';
+    }).join('');
+  } else $('dwCard').style.display='none';
+
+  /* 오늘의 운세 */
+  var now = new Date();
+  var tg = SAJU.todayGZ(now.getFullYear(), now.getMonth()+1, now.getDate());
+  var seedStr = r.solar.y+'-'+r.solar.m+'-'+r.solar.d+'|'+r.dayIdx+'|'+now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate();
+  var rand = mulberry32(xmur3(seedStr)());
+  var WD=['일','월','화','수','목','금','토'];
+  $('todayLine').textContent = now.getFullYear()+'년 '+(now.getMonth()+1)+'월 '+now.getDate()+'일 ('+WD[now.getDay()]+') · 오늘의 일진: '
+    + tg.name+'일 ('+tg.hanja+')';
+
+  /* 지지 합충 보정 */
+  var ub = r.day.branch, tb = tg.branch, bonus=0, relTxt='';
+  if(YUKHAP[tb]===ub){ bonus=1; relTxt=' 오늘의 일진이 당신의 일지와 합(合)을 이루어 주변의 도움이 따르는 날입니다.'; }
+  else if((tb+6)%12===ub){ bonus=-1; relTxt=' 오늘의 일진이 당신의 일지와 충(沖)이 되니, 서두르기보다 한 템포 쉬어 가는 것이 좋습니다.'; }
+  else { SAMHAP.forEach(function(gp){ if(gp.indexOf(tb)>=0 && gp.indexOf(ub)>=0 && tb!==ub){ bonus=1; relTxt=' 오늘의 일진이 당신의 일지와 삼합(三合)의 기운으로 통하니 협력과 만남에 길한 날입니다.'; } }); }
+
+  var scores=[], sum=0;
+  CATS.forEach(function(){ var lv=Math.floor(rand()*5)+ (rand()<0.3?1:0); lv=Math.min(4,Math.max(0,lv+bonus)); scores.push(lv); sum+=lv; });
+  var totalLv = Math.min(4, Math.max(0, Math.round(sum/CATS.length)));
+  $('totalMsg').innerHTML = '<b>총운 '+stars(totalLv+1)+'</b><br>'+TOTAL_MSG[totalLv]+relTxt;
+
+  $('fortuneRows').innerHTML = CATS.map(function(c,i){
+    var pool = MSGS[c][scores[i]];
+    var msg = pool[Math.floor(rand()*pool.length)];
+    return '<div class="fortune-row"><span class="cat">'+c+'</span><span class="stars">'+stars(scores[i]+1)+'</span><span class="msg">'+msg+'</span></div>';
+  }).join('');
+
+  /* 행운 요소: 가장 부족한 오행 기준 */
+  var weak=0, weakV=99;
+  for(e=0;e<5;e++){ if(r.eleCount[e]<weakV){weakV=r.eleCount[e];weak=e;} }
+  var luckyNum = Math.floor(rand()*9)+1;
+  $('luckyRow').innerHTML = ['행운의 색: <b>'+LUCK_COLOR[weak]+'</b>','행운의 방위: <b>'+LUCK_DIR[weak]+'</b>','행운의 숫자: <b>'+luckyNum+'</b>']
+    .map(function(c){return '<span class="chip">'+c+'</span>';}).join('');
+
+  renderMonth(r, now);
+  renderLove(r, now);
+  selectTab('paljja');
+  $('result').style.display='block';
+}
+
+/* ---------- 카테고리 탭 ---------- */
+function selectTab(name){
+  document.querySelectorAll('#tabBar button').forEach(function(b){ b.classList.toggle('on', b.dataset.tab===name); });
+  document.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.toggle('on', p.id==='tab-'+name); });
+}
+$('tabBar').addEventListener('click', function(e){
+  var b = e.target.closest('button'); if(!b) return;
+  selectTab(b.dataset.tab);
+});
+
+/* 지지 관계: 1=합(육합·삼합) -1=충 0=무 */
+function branchRel(a, b){
+  if(YUKHAP[a]===b) return 1;
+  if((a+6)%12===b) return -1;
+  for(var i=0;i<SAMHAP.length;i++){
+    if(SAMHAP[i].indexOf(a)>=0 && SAMHAP[i].indexOf(b)>=0 && a!==b) return 1;
+  }
+  return 0;
+}
+
+/* ---------- 이번 달 운세 ---------- */
+function renderMonth(r, now){
+  var y=now.getFullYear(), m=now.getMonth()+1;
+  /* 이번 달 월건: 오늘 날짜의 월주 */
+  var cur = SAJU.compute({y:y, m:m, d:now.getDate(), h:12, min:0, unknownTime:true});
+  $('monthLine').textContent = y+'년 '+m+'월 · 이번 달의 월건(月建): '+cur.month.name+'월 ('+cur.month.hanja+')';
+
+  var rand = mulberry32(xmur3(r.solar.y+'-'+r.solar.m+'-'+r.solar.d+'|'+r.dayIdx+'|M|'+y+'-'+m)());
+  var bonus = branchRel(cur.month.branch, r.day.branch);
+  var relTxt = bonus>0 ? ' 특히 이번 달의 기운이 당신의 일지와 합(合)을 이루어 귀인의 도움이 따르는 달입니다.'
+    : bonus<0 ? ' 이번 달의 기운이 당신의 일지와 충(沖)이 되니, 큰 변화는 신중하게 결정하는 것이 좋습니다.' : '';
+
+  var scores=[], sum=0;
+  MONTH_CATS.forEach(function(){ var lv=Math.floor(rand()*5); lv=Math.min(4,Math.max(0,lv+bonus)); scores.push(lv); sum+=lv; });
+  var totalLv = Math.min(4, Math.max(0, Math.round(sum/MONTH_CATS.length)));
+  $('monthTotal').innerHTML = '<b>이번 달 총운 '+stars(totalLv+1)+'</b><br>'+MONTH_TOTAL[totalLv]+relTxt;
+  $('monthRows').innerHTML = MONTH_CATS.map(function(c,i){
+    return '<div class="fortune-row"><span class="cat">'+c+'</span><span class="stars">'+stars(scores[i]+1)+'</span><span class="msg">'+MONTH_MSGS[c][scores[i]]+'</span></div>';
+  }).join('');
+
+  /* 달력: 일진과 내 일지의 합·충 */
+  var WD=['일','월','화','수','목','금','토'];
+  var html = WD.map(function(w,i){return '<div class="wd'+(i===0?' sun':'')+'">'+w+'</div>';}).join('');
+  var firstDow = new Date(y, m-1, 1).getDay();
+  var lastDay = new Date(y, m, 0).getDate();
+  for(var i=0;i<firstDow;i++) html += '<div class="cell empty"></div>';
+  for(var d=1;d<=lastDay;d++){
+    var br = (((SAJU.jdn(y,m,d)+49)%60)+60)%60 %12;
+    var rel = branchRel(br, r.day.branch);
+    var mark = rel>0 ? '<div class="mark good">◎ 길일</div>' : rel<0 ? '<div class="mark bad">△ 주의</div>' : '<div class="mark">&nbsp;</div>';
+    var dow = (firstDow + d - 1) % 7;
+    html += '<div class="cell'+(d===now.getDate()?' today':'')+'"><div class="dnum'+(dow===0?' sun':'')+'">'+d+'</div>'+mark+'</div>';
+  }
+  $('calGrid').innerHTML = html;
+}
+
+/* ---------- 애정운 심층 분석 ---------- */
+function renderLove(r, now){
+  var blocks = [];
+  /* 1) 배우자궁(일지) 십신 → 연애 스타일 */
+  blocks.push(['나의 연애 스타일 — 배우자궁(일지 '+SAJU.BRANCHES[r.day.branch]+')으로 보는 사랑',
+    LOVE_STYLE[r.day.branchGod] || LOVE_STYLE['비견']]);
+
+  /* 2) 도화살: 년지·일지 삼합 그룹 기준 (신자진→유, 인오술→묘, 사유축→오, 해묘미→자) */
+  var DOHWA = {8:9,0:9,4:9, 2:3,6:3,10:3, 5:6,9:6,1:6, 11:0,3:0,7:0};
+  var branches = [r.year.branch, r.month.branch, r.day.branch];
+  if(r.hour) branches.push(r.hour.branch);
+  var hasDohwa = branches.indexOf(DOHWA[r.year.branch])>=0 || branches.indexOf(DOHWA[r.day.branch])>=0;
+  blocks.push(['도화살(桃花煞)',
+    hasDohwa ? '사주에 도화살이 있어 사람을 끌어당기는 매력이 남다릅니다. 첫인상이 좋아 이성뿐 아니라 대인관계 전반에서 인기가 따르니, 그 매력을 좋은 인연에 쓰세요.'
+      : '도화살은 없지만, 이는 오히려 진중한 매력을 지녔다는 뜻입니다. 오래 볼수록 빛나는 유형이라 시간이 쌓일수록 깊어지는 인연을 만납니다.']);
+
+  /* 3) 인연의 기운: 남자는 재성, 여자는 관성 개수 */
+  var isM = gender==='M';
+  var targets = isM ? ['편재','정재'] : ['편관','정관'];
+  var starName = isM ? '재성(財星)' : '관성(官星)';
+  var cnt = 0;
+  [r.year, r.month, r.hour].forEach(function(p){ if(p && targets.indexOf(p.stemGod)>=0) cnt++; });
+  [r.year, r.month, r.day, r.hour].forEach(function(p){ if(p && targets.indexOf(p.branchGod)>=0) cnt++; });
+  var fateTxt = cnt===0
+    ? '사주에 '+starName+'이 드러나 있지 않은 유형입니다. 인연이 요란하게 오기보다 조용히 스며들 듯 오며, 한번 맺으면 깊고 단단한 인연이 되는 경우가 많습니다.'
+    : cnt<=2
+    ? starName+'이 알맞게 자리해 인연운이 안정적인 사주입니다. 억지로 만드는 만남보다 일상 속 자연스러운 만남에서 좋은 인연이 이어집니다.'
+    : starName+'이 '+cnt+'개로 많은 편이라 이성 인연이 끊이지 않는 사주입니다. 선택지가 많은 만큼, 마음이 향하는 곳을 신중히 가려내는 안목이 중요합니다.';
+  blocks.push(['인연의 기운', fateTxt]);
+
+  /* 4) 이번 달 데이트 길일 */
+  var y=now.getFullYear(), m=now.getMonth()+1, lastDay=new Date(y,m,0).getDate(), goods=[];
+  for(var d=1;d<=lastDay;d++){
+    var br = (((SAJU.jdn(y,m,d)+49)%60)+60)%60 %12;
+    if(branchRel(br, r.day.branch)>0 && d>=now.getDate()) goods.push(d);
+  }
+  blocks.push([m+'월의 데이트·고백 길일',
+    goods.length ? '이번 달 남은 날 중 <b>'+goods.slice(0,6).map(function(d){return d+'일';}).join(', ')+'</b>은 당신의 사주와 합(合)이 되는 날입니다. 소중한 사람과의 약속, 고백, 상견례는 이 날들을 노려 보세요.'
+      : '이번 달 남은 날 중에는 특별한 길일이 없지만, 큰 흉일도 없습니다. 마음이 움직이는 날이 곧 좋은 날입니다.']);
+
+  $('loveBody').innerHTML = blocks.map(function(b){
+    return '<div class="love-block"><h4>'+b[0]+'</h4><p>'+b[1]+'</p></div>';
+  }).join('');
+}
+
+/* ---------- 실행 ---------- */
+function run(){
+  var errBox=$('errBox'); errBox.style.display='none';
+  var noTime=$('inNoTime').checked;
+  var t=($('inT').value||'12:00').split(':');
+  var input={
+    y:+$('inY').value, m:+$('inM').value, d:+$('inD').value,
+    h:+t[0]||0, min:+t[1]||0,
+    isLunar: cal==='L', isLeap: cal==='L' && $('inLeap').checked,
+    gender: gender, unknownTime: noTime
+  };
+  /* 양력 날짜 유효성 */
+  if(!input.isLunar){
+    var chk=new Date(input.y, input.m-1, input.d);
+    if(chk.getMonth()!==input.m-1 || chk.getDate()!==input.d){
+      errBox.textContent='존재하지 않는 날짜입니다. 다시 확인해 주세요.'; errBox.style.display='block'; return;
+    }
+  }
+  var r = SAJU.compute(input);
+  if(r.error){ errBox.textContent=r.error; errBox.style.display='block'; return; }
+  try{ localStorage.setItem('saju.last', JSON.stringify({
+    name:$('inName').value, gender:gender, cal:cal, leap:$('inLeap').checked,
+    y:input.y,m:input.m,d:input.d,t:$('inT').value,noTime:noTime })); }catch(e){}
+  render(r, $('inName').value.trim());
+  $('result').scrollIntoView({behavior:'smooth'});
+}
+$('btnGo').addEventListener('click', run);
+
+/* 마지막 입력 복원 */
+try{
+  var last = JSON.parse(localStorage.getItem('saju.last')||'null');
+  if(last){
+    $('inName').value=last.name||'';
+    gender=last.gender||'M'; cal=last.cal||'S';
+    document.querySelectorAll('#segGender button').forEach(function(b){b.classList.toggle('on',b.dataset.v===gender);});
+    document.querySelectorAll('#segCal button').forEach(function(b){b.classList.toggle('on',b.dataset.v===cal);});
+    $('leapWrap').style.display = cal==='L'?'flex':'none';
+    $('inLeap').checked=!!last.leap;
+    $('inY').value=last.y; $('inM').value=last.m; $('inD').value=last.d;
+    $('inT').value=last.t||'12:00';
+    $('inNoTime').checked=!!last.noTime; $('inT').disabled=!!last.noTime;
+  }
+}catch(e){}
+})();
+</script>
+
+</body>
+</html>
