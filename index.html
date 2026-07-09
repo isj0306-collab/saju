@@ -127,6 +127,16 @@ details.help .help-in b{color:var(--ink)}
 .match-box.good{background:rgba(46,125,70,.1)} .match-box.bad{background:rgba(157,44,44,.08)}
 .match-box h5{margin:0 0 5px;font-size:13px} .match-box.good h5{color:var(--wood)} .match-box.bad h5{color:var(--accent)}
 .match-box .items{font-size:15px;font-weight:700}
+/* 총운 풀이 */
+.chong-lead{background:var(--chip);border-left:4px solid var(--gold);border-radius:8px;padding:14px 16px;font-size:15px;line-height:1.75;margin-bottom:6px}
+.chong-lead b{color:var(--accent)}
+.chong-sec{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.chong-sec .ch-hd{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.chong-sec .ch-em{font-size:22px}
+.chong-sec .ch-nm{font-size:15.5px;font-weight:800}
+.chong-sec .ch-st{margin-left:auto;color:var(--star);font-size:14px;letter-spacing:1px}
+.chong-sec p{margin:0;font-size:14.5px;line-height:1.75}
+.chong-sec p + p{margin-top:8px}
 
 .dw-meta{font-size:13.5px;color:var(--sub);margin-bottom:10px}
 .dw-list{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}
@@ -224,6 +234,7 @@ details.help .help-in b{color:var(--ink)}
   <div id="result">
     <div class="tabs" id="tabBar">
       <button type="button" data-tab="paljja" class="on">사주팔자</button>
+      <button type="button" data-tab="chong">총운 풀이</button>
       <button type="button" data-tab="today">오늘의 운세</button>
       <button type="button" data-tab="month">한 달 운세</button>
       <button type="button" data-tab="love">애정운</button>
@@ -281,6 +292,14 @@ details.help .help-in b{color:var(--ink)}
           <p>각 칸의 나이는 그 흐름이 시작되는 시점이에요. 좌우로 밀어서 더 먼 나이까지 볼 수 있어요. 지금 내 나이가 속한 칸이 <b>요즘 나의 큰 운</b>이라고 생각하면 돼요.</p>
         </div>
       </details>
+    </div>
+    </div>
+
+    <div class="tab-pane" id="tab-chong">
+    <div class="card">
+      <h2>사주 총운 풀이</h2>
+      <p class="cal-head" style="margin-top:0">태어날 때 정해진 <b>평생의 큰 운</b>을 종합해서 풀어 드려요. 오늘의 운세와 달리 잘 바뀌지 않는, 타고난 성향입니다.</p>
+      <div id="chongBody"></div>
     </div>
     </div>
 
@@ -704,6 +723,20 @@ var SSN_JOB = [
   ['공직·행정','법률·군경','대기업·조직','관리·감독'],
   ['교육·연구','의료·상담','작가·학문','종교·철학']
 ];
+/* 배우자궁(일지 십신)으로 보는 배우자 상 */
+var SPOUSE = {
+  '비견':'나와 대등하고 친구 같은 배우자를 만납니다. 서로 독립적인 관계를 존중할 때 오래갑니다.',
+  '겁재':'활동적이고 주관이 뚜렷한 배우자를 만납니다. 티격태격해도 정이 깊은 짝입니다.',
+  '식신':'밝고 다정하며 나를 편안하게 해 주는 배우자를 만납니다. 함께 있으면 웃음이 많은 가정을 이룹니다.',
+  '상관':'재능 있고 매력적인 배우자를 만납니다. 자극과 즐거움을 주지만, 서로 말을 조심하면 더 좋습니다.',
+  '편재':'활동적이고 스케일 있는 배우자를 만납니다. 사교적이고 능력 있는 짝일 가능성이 높습니다.',
+  '정재':'성실하고 알뜰한, 안정감 있는 배우자를 만납니다. 착실히 가정을 꾸리는 든든한 짝입니다.',
+  '편관':'카리스마 있고 능력 있는 배우자를 만납니다. 듬직하지만 강한 성향이라 서로 존중이 필요합니다.',
+  '정관':'반듯하고 책임감 있는 배우자를 만납니다. 신뢰할 수 있는, 모범적인 짝을 만날 인연입니다.',
+  '편인':'개성 있고 지적인 배우자를 만납니다. 정신적 교감이 잘 되는 독특한 매력의 짝입니다.',
+  '정인':'자상하고 따뜻하게 나를 챙겨 주는 배우자를 만납니다. 어머니(아버지) 같은 포근한 짝입니다.'
+};
+var ELE_HEALTH = ['간·눈·근육과 신경','심장·혈압과 혈액순환','위장·소화기','폐·기관지·피부','신장·방광과 비뇨기'];
 /* 띠 (지지 0~11 순서: 자축인묘진사오미신유술해) */
 var ANIMAL_EMOJI = ['🐭','🐮','🐯','🐰','🐲','🐍','🐴','🐑','🐵','🐔','🐶','🐷'];
 var ANIMAL_TRAIT = [
@@ -998,12 +1031,99 @@ function render(r, name){
   $('luckyRow').innerHTML = ['행운의 색: <b>'+LUCK_COLOR[weak]+'</b>','행운의 방위: <b>'+LUCK_DIR[weak]+'</b>','행운의 숫자: <b>'+luckyNum+'</b>']
     .map(function(c){return '<span class="chip">'+c+'</span>';}).join('');
 
+  renderChong(r);
   renderMonth(r, now);
   renderLove(r, now);
   renderZodiac(r, now);
   renderStar(r, now);
   selectTab('paljja');
   $('result').style.display='block';
+}
+
+/* ---------- 사주 총운 풀이 ---------- */
+function godCounts(r){
+  var g = {};
+  function add(x){ if(x) g[x] = (g[x]||0)+1; }
+  add(r.year.stemGod); add(r.month.stemGod); if(r.hour) add(r.hour.stemGod);
+  add(r.year.branchGod); add(r.month.branchGod); add(r.day.branchGod); if(r.hour) add(r.hour.branchGod);
+  return g;
+}
+function renderChong(r){
+  var g = godCounts(r), gc = function(n){ return g[n]||0; };
+  var bigeop=gc('비견')+gc('겁재'), siksang=gc('식신')+gc('상관'),
+      jae=gc('편재')+gc('정재'), gwan=gc('편관')+gc('정관'), inseong=gc('편인')+gc('정인');
+  var dayEle = SAJU.STEM_ELE[r.day.stem];
+  var support = r.eleCount[dayEle] + r.eleCount[(dayEle-1+5)%5];
+  var sRatio = support / r.total;
+  var strong = sRatio>=0.5, weak = sRatio<=0.34;
+  var d = ILGAN_DESC[r.day.stem];
+
+  /* 리드 총평 */
+  var lead = '당신은 <b>'+d[0].split(' ')[0]+'</b> 일간을 타고났습니다. ';
+  lead += strong ? '자기 힘이 강한 <b>신강(身强)</b> 사주라, 남에게 기대기보다 스스로 길을 개척할 때 크게 이룹니다. 주관과 추진력이 무기이니, 여기에 주변과 협력하는 지혜를 더하면 그릇이 더욱 커집니다.'
+    : weak ? '주변과 조화를 이루는 <b>신약(身弱)</b> 사주라, 좋은 사람과 좋은 환경을 만나는 것이 곧 운입니다. 인복이 많은 유형이니 인간관계를 소중히 하고, 자신감을 조금만 더하면 원하는 것을 얻습니다.'
+    : '기운의 균형이 잘 잡힌 <b>중화(中和)</b> 사주라, 어떤 환경에서도 무난히 적응하며 큰 굴곡 없이 자기 몫을 해냅니다. 꾸준함이 당신의 가장 큰 자산입니다.';
+  var html = '<div class="chong-lead">'+lead+'</div>';
+
+  function sec(em, nm, lv, body){
+    return '<div class="chong-sec"><div class="ch-hd"><span class="ch-em">'+em+'</span><span class="ch-nm">'+nm+'</span><span class="ch-st">'+stars(lv)+'</span></div>'+body+'</div>';
+  }
+
+  /* 재물운 */
+  var jeongjae=gc('정재'), pyeonjae=gc('편재'), wealthLv, wealthTxt;
+  if(jae===0){ wealthLv=3; wealthTxt='<p>타고난 사주에 재물(財)의 글자가 겉으로 드러나 있지 않습니다. 큰돈을 좇기보다 <b>실력과 명예, 꾸준한 수입</b>으로 안정을 이루는 유형이라, 한 분야의 전문가가 되면 돈은 자연히 따라옵니다.</p>'; }
+  else if(jae>=3){ wealthLv=4; wealthTxt='<p>재물의 기회가 <b>매우 많은</b> 사주입니다. 돈을 버는 재주와 수단이 풍부해 재물복이 큽니다. 다만 들어오는 만큼 나가기도 쉬우니, "버는 능력"보다 <b>"지키는 습관"</b>이 부(富)를 좌우합니다.</p>'; }
+  else if(pyeonjae>=jeongjae){ wealthLv=4; wealthTxt='<p>활동적인 <b>편재(偏財)형</b> 재물운입니다. 사업·투자처럼 큰돈의 흐름을 읽는 감각이 있어, 기회를 잡으면 크게 벌 수 있습니다. 여러 곳에 벌이기보다 한곳에 집중할 때 실속이 커집니다.</p>'; }
+  else { wealthLv=3; wealthTxt='<p>성실하게 모으는 <b>정재(正財)형</b> 재물운입니다. 안정적인 수입과 저축으로 착실히 자산을 불리는 유형이라, 한탕을 노리기보다 <b>꾸준함</b>이 부자로 가는 가장 확실한 길입니다.</p>'; }
+  html += sec('💰','재물운', wealthLv, wealthTxt);
+
+  /* 직업·성공운 */
+  var top = [bigeop,siksang,jae,gwan,inseong].indexOf(Math.max(bigeop,siksang,jae,gwan,inseong));
+  var jobLv, jobTxt;
+  if(gwan>0){ jobLv=4; jobTxt='<p>사주에 <b>관성(官)</b>이 있어 조직·직장에서 인정받고, 지위가 오르는 운이 따릅니다. 책임을 맡을수록 빛나는 유형이라 공직·회사·전문 조직에서 성공하기 좋습니다.</p>'; }
+  else if(siksang>0){ jobLv=3; jobTxt='<p>조직의 틀보다 <b>재능을 자유롭게 펼치는 일</b>에 어울립니다. 식상(食傷)이 발달해 창작·전문기술·자영업처럼 내 이름을 걸고 하는 일에서 크게 성장합니다.</p>'; }
+  else { jobLv=3; jobTxt='<p>스스로 중심을 잡고 밀고 나가는 힘이 강한 유형입니다. 남 밑에서 오래 있기보다 <b>독립적으로 자기 영역</b>을 만들 때 능력이 발휘됩니다.</p>'; }
+  jobTxt += '<p style="color:var(--sub);font-size:13.5px">어울리는 분야: '+SSN_JOB[top].join(' · ')+'</p>';
+  html += sec('💼','직업·성공운', jobLv, jobTxt);
+
+  /* 애정·결혼운 */
+  var isM = r.year.stem!=null && gender==='M';
+  var spouseTxt = SPOUSE[r.day.branchGod] || SPOUSE['비견'];
+  var starName = isM ? '재성(아내에 해당)' : '관성(남편에 해당)';
+  var cntSpouse = isM ? jae : gwan;
+  var loveLv, flow;
+  if(cntSpouse===0){ loveLv=3; flow='인연이 요란하게 오기보다 조용히 다가오는 편입니다. 서두르지 않으면 깊고 단단한 인연을 만납니다.'; }
+  else if(cntSpouse>=3){ loveLv=4; flow='이성 인연이 많아 인기가 따르는 사주입니다. 선택지가 많은 만큼, 진득하게 한 사람을 바라보는 마음이 좋은 결혼으로 이어집니다.'; }
+  else { loveLv=4; flow='이성 인연이 알맞게 자리해 결혼운이 안정적입니다. 자연스러운 만남 속에서 좋은 짝을 만날 인연입니다.'; }
+  html += sec('💍','애정·결혼운', loveLv, '<p>'+spouseTxt+'</p><p>'+flow+'</p>');
+
+  /* 건강운 */
+  var lacks=[], much=-1, muchV=-1, e;
+  for(e=0;e<5;e++){ if(r.eleCount[e]===0) lacks.push(e); if(r.eleCount[e]>muchV){muchV=r.eleCount[e];much=e;} }
+  var hLv, hTxt;
+  if(lacks.length===0 && muchV<=3){ hLv=5; hTxt='<p>오행이 고루 갖춰져 <b>큰 병 없이 건강한 편</b>입니다. 지금의 균형을 유지하는 규칙적인 생활이 최고의 보약입니다.</p>'; }
+  else {
+    hLv=4; var parts=[];
+    if(lacks.length) parts.push('사주에 '+lacks.map(function(x){return SAJU.ELE_NAMES[x];}).join('·')+' 기운이 부족해 <b>'+lacks.map(function(x){return ELE_HEALTH[x];}).join(', ')+'</b> 쪽이 약해지기 쉬우니 미리 챙기세요.');
+    if(muchV>=4) parts.push(SAJU.ELE_NAMES[much]+' 기운이 강해 <b>'+ELE_HEALTH[much]+'</b> 쪽에 무리가 가기 쉬우니 과로를 피하세요.');
+    hTxt='<p>'+parts.join(' ')+'</p><p style="color:var(--sub);font-size:13.5px">※ 의학적 진단이 아닌, 기운의 균형으로 보는 참고 사항입니다.</p>';
+  }
+  html += sec('🍀','건강운', hLv, hTxt);
+
+  /* 인생 조언 */
+  var needEle = strong ? (dayEle+2)%5 : (dayEle-1+5)%5; // 신강=덜어내는(재), 신약=보태는(인)
+  var advice = '<p>'+(strong
+    ? '기운이 강한 사주이니, 그 힘을 <b>밖으로 쓰는 것</b>이 좋습니다. 도전하고, 베풀고, 결과를 만들어 내는 활동 속에서 운이 크게 열립니다. '
+    : weak ? '기운을 <b>채워 주는 것</b>이 좋습니다. 배움을 이어 가고, 나를 아끼는 사람들과 함께할 때 운이 살아납니다. '
+    : '지금처럼 <b>균형을 지키는 것</b>이 곧 복입니다. 한쪽으로 치우치지 않는 꾸준함이 인생을 안정되게 이끕니다. ')
+    + '생활 속에서는 '+ELE_LACK[needEle].replace(/^[^.]*\. /,'') + '</p>';
+  html += sec('🌟','인생 조언', 5, advice);
+
+  html += '<details class="help" style="margin-top:18px"><summary>❓ 이 풀이는 어떻게 나온 거예요? (쉽게 보기)</summary><div class="help-in">'
+    + '<p>랜덤이 아니에요! 당신의 사주 여덟 글자를 분석해서, <b>재물·직업·결혼·건강</b>에 해당하는 기운(십신·오행)이 얼마나 있는지를 보고 풀이한 거예요. 그래서 같은 생년월일이면 <b>언제 봐도 같은 결과</b>가 나와요.</p>'
+    + '<p>다만 사주는 "정해진 운명"이 아니라 <b>"타고난 성향과 흐름"</b>이에요. 좋은 건 살리고 부족한 건 채우라는 <b>참고서</b>로 봐 주세요. 결국 인생을 만드는 건 나 자신이에요 🙂</p></div></details>';
+
+  $('chongBody').innerHTML = html;
 }
 
 /* ---------- 띠별 운세 ---------- */
