@@ -80,6 +80,26 @@ body{background:var(--bg)}
 
 .ilgan-tit{font-size:15.5px;font-weight:800;margin-bottom:8px}
 .body-txt{font-size:14.5px;margin:0;white-space:pre-line}
+.persona-block{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.persona-block h4{margin:0 0 8px;font-size:14.5px;color:var(--gold);display:flex;align-items:center;gap:8px}
+.persona-block h4 .pin{font-size:12px;color:var(--sub);font-weight:600}
+.persona-block p{margin:0;font-size:14.5px}
+.ssn-bars{margin:10px 0 12px}
+.ssn-row{display:flex;align-items:center;gap:10px;margin:6px 0}
+.ssn-row .nm{width:112px;font-size:13px;font-weight:700}
+.ssn-row .nm small{color:var(--sub);font-weight:400}
+.ssn-row .bar{flex:1;height:12px;background:var(--chip);border-radius:6px;overflow:hidden}
+.ssn-row .bar i{display:block;height:100%;background:var(--gold);border-radius:6px}
+.ssn-row.top .bar i{background:var(--accent)}
+.ssn-row .ct{width:22px;text-align:right;font-size:12.5px;color:var(--sub)}
+.sw-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.sw-box{border-radius:10px;padding:12px 14px;font-size:14px}
+.sw-box.str{background:rgba(46,125,70,.1)} .sw-box.wk{background:rgba(157,44,44,.08)}
+.sw-box h5{margin:0 0 6px;font-size:13px} .sw-box.str h5{color:var(--wood)} .sw-box.wk h5{color:var(--accent)}
+.sw-box ul{margin:0;padding-left:16px} .sw-box li{margin:3px 0}
+.job-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.job-chips .chip b{color:var(--gold)}
+@media (max-width:520px){ .sw-grid{grid-template-columns:1fr} .ssn-row .nm{width:96px} }
 
 .dw-meta{font-size:13.5px;color:var(--sub);margin-bottom:10px}
 .dw-list{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}
@@ -199,9 +219,10 @@ body{background:var(--bg)}
     </div>
 
     <div class="card">
-      <h2>일간으로 보는 성격</h2>
+      <h2>성격 심층 분석</h2>
       <div class="ilgan-tit" id="ilganTit"></div>
       <p class="body-txt" id="ilganTxt"></p>
+      <div id="personaBody"></div>
     </div>
 
     <div class="card" id="dwCard">
@@ -580,6 +601,43 @@ var ILGAN_DESC = {
   8:['임수(壬水) — 도도히 흐르는 큰 강과 바다','스케일이 크고 지혜로운 바다 같은 사람입니다. 생각이 깊고 포용력이 있어 다양한 사람과 어울리며, 새로운 지식과 변화를 즐기는 자유로운 영혼입니다. 다만 한곳에 정착하지 못하고 흘러 다니기 쉬우니, 목표라는 둑을 세우면 큰물이 큰일을 이룹니다.'],
   9:['계수(癸水) — 촉촉이 스며드는 빗물과 이슬','감수성이 풍부하고 총명한 사람입니다. 조용히 스며들어 어느새 핵심에 닿아 있는 통찰력과 직관이 있고, 순수하고 여린 마음으로 주변을 적셔 줍니다. 다만 생각이 많아 걱정도 많은 편이니, 머리로 재기보다 일단 시작하는 행동력이 운을 틔웁니다.']
 };
+/* 십신 5분류: 0비겁 1식상 2재성 3관성 4인성 */
+var SSN_GROUP = { '비견':0,'겁재':0, '식신':1,'상관':1, '편재':2,'정재':2, '편관':3,'정관':3, '편인':4,'정인':4 };
+var SSN_INFO = [
+  ['비겁 (比劫)','자립·주관·경쟁심',
+    '자기 주관이 뚜렷하고 독립심이 강한 기질이 두드러집니다. 남에게 기대기보다 스스로 해내려 하고, 동료·친구와의 의리를 소중히 여깁니다. 지는 것을 싫어하는 승부욕이 추진력이 되지만, 고집이나 자존심 대결로 번지지 않도록 한 발 양보하는 여유를 기르면 인간관계가 한결 부드러워집니다.'],
+  ['식상 (食傷)','표현·창의·재능',
+    '자기를 표현하고 새로운 것을 만들어 내는 재능이 돋보입니다. 말솜씨나 손재주, 예술적 감각이 뛰어나고 호기심이 많아 배우고 즐기는 데 능합니다. 자유로운 기질이라 틀에 갇히는 것을 답답해하니, 재능을 마음껏 펼칠 수 있는 환경에서 크게 성장합니다. 다만 하고 싶은 말을 그대로 내뱉어 오해를 사지 않도록 주의하세요.'],
+  ['재성 (財星)','현실감각·재물·활동',
+    '현실 감각이 뛰어나고 목표를 결과로 만들어 내는 실행력이 강합니다. 돈의 흐름을 읽는 눈과 사람을 다루는 사교성이 있어 어디서든 실속을 챙깁니다. 부지런하고 활동적이라 가만히 있는 것을 잘 못 견디는 편입니다. 여러 일을 벌이기보다 하나에 집중할 때 재물과 성취가 더 크게 따라옵니다.'],
+  ['관성 (官星)','책임·명예·원칙',
+    '책임감이 강하고 원칙을 지키는 반듯한 기질입니다. 맡은 일은 끝까지 해내고 명예와 신뢰를 소중히 여겨, 조직이나 공적인 자리에서 인정받는 유형입니다. 자기 관리가 철저한 만큼 스스로에게 엄격해 스트레스를 안고 살기 쉬우니, 가끔은 힘을 빼고 완벽하지 않아도 괜찮다고 다독여 주세요.'],
+  ['인성 (印星)','학습·사고·수용',
+    '배우고 생각하는 것을 좋아하는 학구적인 기질입니다. 이해력과 통찰이 깊고 남을 품어 주는 따뜻함이 있어, 연구·교육·상담처럼 지식과 마음을 나누는 일에 어울립니다. 신중하게 계획하는 편이지만, 생각이 많아 실행이 늦어질 수 있으니 "일단 시작"하는 습관이 좋은 운을 부릅니다.']
+];
+/* 일지 12: 내면의 나 */
+var ILJI_INNER = [
+  '겉으로는 조용해 보여도 속으로는 부지런히 머리를 굴리는, 총명하고 적응력 빠른 내면을 지녔습니다.',
+  '묵묵하고 성실한 내면의 소유자입니다. 인내심이 강해 한번 시작한 일은 끝을 보지만, 속을 잘 안 드러내 답답하다는 말을 듣기도 합니다.',
+  '겉과 속 모두 활기차고 진취적입니다. 새로운 도전을 두려워하지 않는 개척자의 기질이 내면에 자리합니다.',
+  '온화해 보이지만 내면에는 섬세한 예술적 감각과 은근한 고집이 함께 있습니다. 자기만의 미감이 뚜렷합니다.',
+  '겉은 부드러워도 내면은 넓고 듬직합니다. 여러 사람을 품는 포용력과 현실적인 판단력을 지녔습니다.',
+  '조용한 겉모습 안에 뜨거운 열정과 예리한 직관이 숨어 있습니다. 겉보기보다 훨씬 스케일이 큰 내면입니다.',
+  '밝고 화통한 내면입니다. 감정 표현이 솔직하고 정이 많아, 사람을 끌어당기는 따뜻한 에너지가 있습니다.',
+  '온순해 보여도 내면에는 확고한 소신과 예술적 감수성이 있습니다. 부드러움 속에 심지가 굳은 유형입니다.',
+  '겉과 속 모두 의리 있고 활동적입니다. 임기응변이 뛰어나고 승부처에서 강해지는 담대한 내면입니다.',
+  '차분하고 단정해 보이지만 내면은 예리하고 완벽을 추구합니다. 자기 세계가 분명한 섬세한 유형입니다.',
+  '듬직하고 신의 있는 내면입니다. 좀처럼 흔들리지 않는 뚝심과 책임감으로 주변의 신뢰를 얻습니다.',
+  '겉은 유순해도 내면에는 깊은 지혜와 넓은 상상력이 흐릅니다. 생각이 깊고 마음이 너른 유형입니다.'
+];
+/* 십신 dominant → 어울리는 분야 */
+var SSN_JOB = [
+  ['전문직','창업·자영업','스포츠·운동','프리랜서'],
+  ['예술·디자인','방송·크리에이터','요리·식음료','기획·마케팅'],
+  ['경영·사업','영업·유통','금융·투자','부동산'],
+  ['공직·행정','법률·군경','대기업·조직','관리·감독'],
+  ['교육·연구','의료·상담','작가·학문','종교·철학']
+];
 var ELE_LACK = {
   0:'목(木)이 부족하면 시작하는 힘과 추진력이 아쉬울 수 있습니다. 초록색 소품, 식물 키우기, 아침 산책이 기운을 보충해 줍니다.',
   1:'화(火)가 부족하면 열정과 표현력이 아쉬울 수 있습니다. 붉은색 포인트, 햇볕 쬐기, 적당한 운동으로 온기를 더해 보세요.',
@@ -773,11 +831,12 @@ function render(r, name){
   }
   $('eleNote').innerHTML = noteHtml;
 
-  /* 일간 */
+  /* 성격 심층 분석 */
   var d = ILGAN_DESC[r.day.stem];
   $('ilganTit').textContent = '당신의 일간(日干)은 '+d[0]+' 입니다';
   $('ilganTit').className = 'ilgan-tit t-'+ELE_CLS[SAJU.STEM_ELE[r.day.stem]];
-  $('ilganTxt').textContent = d[1] + (r.unknownTime ? '\n\n※ 태어난 시간을 모르는 경우 시주(時柱)를 제외한 삼주(三柱)로 계산했습니다.' : '');
+  $('ilganTxt').textContent = d[1];
+  renderPersona(r);
 
   /* 대운 */
   if(r.daewoon){
@@ -847,6 +906,68 @@ function branchRel(a, b){
     if(SAMHAP[i].indexOf(a)>=0 && SAMHAP[i].indexOf(b)>=0 && a!==b) return 1;
   }
   return 0;
+}
+
+/* ---------- 성격 심층 분석 ---------- */
+var SW_TABLE = [
+  [['뚜렷한 주관과 추진력','의리와 책임감','스스로 해내는 독립심'],['고집·자존심 대결','남의 말을 흘려듣기 쉬움','재물 관리의 기복']],
+  [['풍부한 창의력과 아이디어','뛰어난 표현력·손재주','빠른 순발력과 호기심'],['감정 기복과 변덕','직설적인 말로 인한 구설','마무리가 약해지기 쉬움']],
+  [['탁월한 현실 감각','목표를 이루는 실행력','두루 어울리는 사교성'],['일을 여러 개 벌이는 산만함','조급함','과욕으로 인한 무리']],
+  [['강한 책임감과 성실함','원칙을 지키는 반듯함','조직에서 얻는 신뢰'],['스스로를 옥죄는 스트레스','융통성 부족','완벽주의로 인한 피로']],
+  [['깊은 사고력과 통찰','묵묵히 견디는 인내','남을 품는 배려심'],['생각만 하다 실행이 늦어짐','주변에 기대려는 마음','걱정과 근심이 많음']]
+];
+function renderPersona(r){
+  /* 십신 5분류 카운트 */
+  var cnt = [0,0,0,0,0];
+  [r.year.stemGod, r.month.stemGod, r.hour && r.hour.stemGod].forEach(function(g){ if(g && SSN_GROUP[g]!=null) cnt[SSN_GROUP[g]]++; });
+  [r.year.branchGod, r.month.branchGod, r.day.branchGod, r.hour && r.hour.branchGod].forEach(function(g){ if(g && SSN_GROUP[g]!=null) cnt[SSN_GROUP[g]]++; });
+  var maxC = Math.max.apply(null, cnt), sumC = cnt.reduce(function(a,b){return a+b;},0) || 1;
+  var top = cnt.indexOf(maxC);
+
+  var blocks = '';
+  /* 1) 십신 기질 */
+  var bars = '';
+  for(var i=0;i<5;i++){
+    bars += '<div class="ssn-row'+(i===top?' top':'')+'"><span class="nm">'+SSN_INFO[i][0]+' <small>'+SSN_INFO[i][1]+'</small></span>'
+      +'<div class="bar"><i style="width:'+(maxC?cnt[i]/maxC*100:0)+'%"></i></div><span class="ct">'+cnt[i]+'</span></div>';
+  }
+  blocks += '<div class="persona-block"><h4>기질 유형 <span class="pin">— 사주에 가장 많은 기운</span></h4>'
+    + '<div class="ssn-bars">'+bars+'</div>'
+    + '<p>당신은 <b>'+SSN_INFO[top][0].split(' ')[0]+'</b>의 기운이 가장 강합니다. '+SSN_INFO[top][2]+'</p></div>';
+
+  /* 2) 일지 내면 */
+  blocks += '<div class="persona-block"><h4>겉과 속 — 일지('+SAJU.BRANCHES[r.day.branch]+')로 보는 내면의 나</h4>'
+    + '<p>'+ILJI_INNER[r.day.branch]+'</p></div>';
+
+  /* 3) 음양·주관 성향 */
+  var yangPct = Math.round(r.yang/r.total*100);
+  var yyTxt = yangPct>=63 ? '양(陽)의 기운이 뚜렷해 활동적이고 외향적입니다. 밖으로 나가 사람들과 부딪히며 에너지를 얻는 유형이라, 표현하고 움직일수록 운이 살아납니다.'
+    : yangPct<=37 ? '음(陰)의 기운이 뚜렷해 차분하고 내향적입니다. 혼자만의 시간에 에너지를 충전하고 깊이 사고하는 유형이라, 조용한 몰입 속에서 진가를 발휘합니다.'
+    : '음양의 균형이 잘 잡혀 있어 상황에 따라 활동적이기도, 차분하기도 한 유연한 성향입니다. 나설 때와 물러설 때를 아는 것이 강점입니다.';
+  var dayEle = SAJU.STEM_ELE[r.day.stem];
+  var support = r.eleCount[dayEle] + r.eleCount[(dayEle-1+5)%5];
+  var sRatio = support / r.total;
+  var strTxt = sRatio>=0.5 ? '<b>신강(身强)</b> — 자기 힘이 강한 사주입니다. 주관이 뚜렷하고 추진력이 좋아 스스로 길을 개척하는 유형입니다. 다만 독선으로 흐르지 않도록 남의 의견에 귀 기울이면 더 큰 그릇이 됩니다.'
+    : sRatio<=0.34 ? '<b>신약(身弱)</b> — 주변과 조화를 이루는 사주입니다. 섬세하고 유연하며 협력에 능해 사람들 사이에서 빛나는 유형입니다. 자신감을 조금만 더하면 원하는 것을 더 쉽게 얻습니다.'
+    : '<b>중화(中和)</b> — 힘의 균형이 잘 잡힌 사주입니다. 지나치게 밀어붙이지도, 휩쓸리지도 않는 안정감이 있어 어떤 환경에서도 무난히 적응합니다.';
+  blocks += '<div class="persona-block"><h4>기운의 성향</h4>'
+    + '<p>'+yyTxt+'</p><p style="margin-top:8px">'+strTxt+'</p></div>';
+
+  /* 4) 강점과 보완점 */
+  var sw = SW_TABLE[top];
+  blocks += '<div class="persona-block"><h4>강점과 보완점</h4><div class="sw-grid">'
+    + '<div class="sw-box str"><h5>💪 타고난 강점</h5><ul>'+sw[0].map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>'
+    + '<div class="sw-box wk"><h5>🌱 보완하면 좋은 점</h5><ul>'+sw[1].map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul></div>'
+    + '</div></div>';
+
+  /* 5) 어울리는 분야 */
+  blocks += '<div class="persona-block"><h4>어울리는 분야</h4>'
+    + '<p style="margin-bottom:2px">타고난 기질을 살리기 좋은 방향입니다. 참고로만 봐 주세요.</p>'
+    + '<div class="job-chips">'+SSN_JOB[top].map(function(j){return '<span class="chip"><b>'+j+'</b></span>';}).join('')+'</div></div>';
+
+  if(r.unknownTime) blocks += '<p class="cal-head" style="margin:14px 0 0">※ 태어난 시간을 몰라 시주(時柱)를 제외한 삼주(三柱)로 분석했습니다. 시간을 알면 더 정밀해집니다.</p>';
+
+  $('personaBody').innerHTML = blocks;
 }
 
 /* ---------- 이번 달 운세 ---------- */
